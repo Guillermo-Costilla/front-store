@@ -6,6 +6,7 @@ import apiUrl from "../api";
 export const useStoreReg = create((set) => ({
   // Estado inicial
   user: null,
+  setUser: (userData) => set({ user: userData }),
   token: null,
 
   // Acciones
