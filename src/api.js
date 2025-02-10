@@ -1,4 +1,4 @@
-let apiUrl = "http://localhost:5000/api/";
+let apiUrl = "https://fakestoreapi.com";
 
 if (process.env.NODE_ENV === "production") {
   apiUrl = import.meta.env.VITE_APP_BACK_URL;

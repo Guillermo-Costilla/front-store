@@ -10,10 +10,17 @@ const login = () => {
     password: '',
   })
 
+  //debito a que por la inactividad de la base de datos, mongo la desactiva, hasta que se active manualmente. Hasta entonces, dara fallas en el login.
+
   const handleLogin = async (e) => {
     e.preventDefault();
-    const userData = await userLogin(formData);
-    setUser(userData);
+    const formData = new FormData(e.target);
+    const data = {
+      email: formData.get('email'),
+      password: formData.get('password')
+    };
+
+    await userLogin(data);
   }
 
   const handleInput = (e) => {

@@ -18,15 +18,15 @@ const router = createBrowserRouter([
                 element: <Products />
             },
             {
+                path: '/:id',
+                element: <ProductsDetails />
+            },
+            {
                 path: '/cart',
                 element: <Cart />
 
             }
         ]
-    },
-    {
-        path: '/:id',
-        element: <ProductsDetails />
     },
     {
         path: '/login',

@@ -18,8 +18,10 @@ export const useStoreReg = create((set) => ({
 
   userLogin: async (data) => {
     try {
-      const response = await axios.post(`${apiUrl}/users`, data);
+      const response = await axios.post(`${apiUrl}users/login`,data);
       const userData = response.data.response;
+      console.log(userData)
+
 
       localStorage.setItem("token", userData.token);
       localStorage.setItem("user", JSON.stringify(userData.user));
@@ -45,7 +47,7 @@ export const useStoreReg = create((set) => ({
 
   userSignup: async (data) => {
     try {
-      const response = await axios.post(`${apiUrl}/users`, data);
+      const response = await axios.post(`${apiUrl}auth/signup`, data);
 
       Swal.fire({
         title: "¡Success!",
@@ -68,7 +70,7 @@ export const useStoreReg = create((set) => ({
     try {
       const token = localStorage.getItem("token");
       const config = { headers: { Authorization: `Bearer ${token}` } };
-      await axios.post(`${apiUrl}/users/signout`, null, config);
+      await axios.post(`${apiUrl}auth/signout`, null, config);
 
       localStorage.removeItem("token");
       localStorage.removeItem("user");
