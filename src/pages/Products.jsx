@@ -11,7 +11,7 @@ const Products = () => {
 
     useEffect(() => {
         getProducts();
-    }, []);
+    }, [getProducts]);
 
     useEffect(() => {
         const uniqueCategories = [...new Set(products.map(product => product.category))];

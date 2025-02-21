@@ -2,7 +2,7 @@ import NavBar from "../components/NavBar";
 import Footer from "../components/Footer";
 import { Outlet } from "react-router-dom";
 
-const main = () => {
+const Main = () => {
     return (
         <>
             <NavBar />
@@ -12,4 +12,4 @@ const main = () => {
     )
 }
 
-export default main;
+export default Main;
