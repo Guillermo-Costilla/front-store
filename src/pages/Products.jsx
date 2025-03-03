@@ -2,12 +2,16 @@ import { useEffect, useState } from 'react';
 import { useStoreApi } from "../store/storeApi";
 import Card from '../components/Card';
 import { Link } from 'react-router-dom';
+import CircularProgress from '../components/CircularIndeterminate';
 
 
 
 const Products = () => {
     const { products, getProducts } = useStoreApi();
     const [categories, setCategories] = useState([]);
+    const percentage = 66;
+
+
 
     useEffect(() => {
         getProducts();
@@ -37,7 +41,9 @@ const Products = () => {
 
                     ))
                 ) : (
-                    <p>Cargando productos...</p>
+                    <div className='h-[200] w-[200] mt-10'>
+                        <CircularProgress />
+                    </div>
                 )}
             </div>
         </div>
