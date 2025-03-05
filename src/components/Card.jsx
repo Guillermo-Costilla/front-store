@@ -2,7 +2,7 @@
 
 const Card = ({ product }) => {
     return (
-        <div key={product.id} className=' rounded-xl flex flex-col border-2 w-96 font-sans shadow-2xl m-[30px] hover:-translate-y-1 hover:scale-110 duration-300'>
+        <div key={product.id} className=' rounded-xl flex flex-col border-2 w-96 font-sans shadow-md m-[30px] hover:-translate-y-1 hover:scale-110 duration-300'>
             <div className='w-full'>
                 <img src={product.image} className='w-full h-[300px] object-contain' alt={product.title} />
             </div>

@@ -3,6 +3,7 @@ import { Bars3Icon, BellIcon, XMarkIcon } from '@heroicons/react/24/outline'
 import defaultPhoto from '../assets/avatar.png'
 import { useStoreReg } from '../store/useStoreReg'
 import { Link } from 'react-router-dom'
+import store from '../assets/store.png'
 
 const navigation = [
   { name: 'Coupon', href: '/coupon', current: true },
@@ -23,7 +24,7 @@ export default function NavBar() {
   }
 
   return (
-    <Disclosure as="nav" className="bg-gray-800">
+    <Disclosure as="nav" className="bg-slate-900 py-2">
       <div className="mx-auto max-w-7xl px-2 sm:px-6 lg:px-8">
         <div className="relative flex h-16 items-center justify-between">
           <div className="absolute inset-y-0 left-0 flex items-center sm:hidden">
@@ -39,11 +40,11 @@ export default function NavBar() {
             <div className="flex shrink-0 items-center">
               <img
                 alt="Your Company"
-                src="https://tailwindui.com/plus/img/logos/mark.svg?color=indigo&shade=500"
-                className="h-8 w-auto"
+                src={store}
+                className="h-14 w-auto"
               />
             </div>
-            <div className="hidden sm:ml-6 sm:block">
+            <div className="hidden sm:ml-6 sm:block mt-2">
               <div className="flex space-x-4">
                 {navigation.map((item) => (
                   <a
@@ -51,7 +52,7 @@ export default function NavBar() {
                     href={item.href}
                     aria-current={item.current ? 'page' : undefined}
                     className={classNames(
-                      item.current ? 'bg-gray-900 text-white' : 'text-gray-300 hover:bg-gray-700 hover:text-white',
+                      item.current ? 'bg-slate-600 text-white' : 'text-gray-300 hover:bg-gray-700 hover:text-white',
                       'rounded-md px-3 py-2 text-sm font-medium',
                     )}
                   >
@@ -93,35 +94,29 @@ export default function NavBar() {
                 className="absolute right-0 z-10 mt-2 w-48 origin-top-right rounded-md bg-white py-1 ring-1 shadow-lg ring-black/5 transition focus:outline-hidden data-closed:scale-95 data-closed:transform data-closed:opacity-0 data-enter:duration-100 data-enter:ease-out data-leave:duration-75 data-leave:ease-in"
               >
                 <MenuItem>
-                  {({ active }) => (
-                    <Link
-                      to={user ? '/profile' : '/login'}
-                      className={`block px-4 py-2 text-sm text-gray-700 ${active ? 'bg-gray-100' : ''}`}
-                    >
-                      {user ? 'Profile' : 'Login'}
-                    </Link>
-                  )}
+                  <Link
+                    to={user ? '/profile' : '/login'}
+                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                  >
+                    {user ? 'Profile' : 'Login'}
+                  </Link>
                 </MenuItem>
                 <MenuItem>
-                  {({ active }) => (
-                    <Link
-                      to={user ? '/My purchases' : 'register'}
-                      className={`block px-4 py-2 text-sm text-gray-700 ${active ? 'bg-gray-100' : ''}`}
-                    >
-                      {user ? 'My purchases' : 'Register'}
-                    </Link>
-                  )}
+                  <Link
+                    to={user ? '/My purchases' : 'register'}
+                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                  >
+                    {user ? 'My purchases' : 'Register'}
+                  </Link>
                 </MenuItem>
                 {user && (
                   <MenuItem>
-                    {({ active }) => (
-                      <button
-                        onClick={handleLogout}
-                        className={`w-full text-left px-4 py-2 text-sm text-gray-700 ${active ? 'bg-gray-100' : ''}`}
-                      >
-                        Sign out
-                      </button>
-                    )}
+                    <button
+                      onClick={handleLogout}
+                      className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                    >
+                      Sign out
+                    </button>
                   </MenuItem>
                 )}
               </MenuItems>
@@ -139,7 +134,7 @@ export default function NavBar() {
               href={item.href}
               aria-current={item.current ? 'page' : undefined}
               className={classNames(
-                item.current ? 'bg-gray-900 text-white' : 'text-gray-300 hover:bg-gray-700 hover:text-white',
+                item.current ? 'bg-slate-600 text-white' : 'text-gray-300 hover:bg-gray-700 hover:text-white',
                 'block rounded-md px-3 py-2 text-base font-medium',
               )}
             >
