@@ -37,13 +37,15 @@ export default function NavBar() {
             </DisclosureButton>
           </div>
           <div className="flex flex-1 items-center justify-center sm:items-stretch sm:justify-start">
-            <div className="flex shrink-0 items-center">
-              <img
-                alt="Store"
-                src={store}
-                className="h-14 w-auto"
-              />
-            </div>
+            <Link to="/">
+              <div className="flex shrink-0 items-center">
+                <img
+                  alt="Store"
+                  src={store}
+                  className="h-14 w-auto"
+                />
+              </div>
+            </Link>
             <div className="hidden sm:ml-6 sm:block mt-2">
               <div className="flex space-x-4">
                 {navigation.map((item) => (

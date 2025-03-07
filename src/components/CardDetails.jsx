@@ -25,48 +25,61 @@ const CardDetails = (product) => {
     }
 
     return (
-        <div className='w-full h-screen font-sans '>
-            <div className='w-full h-screen lg:w-5/6 lg:h-3/4 lg:mx-auto mt-10 lg:rounded-lg lg:shadow-lg flex flex-col lg:flex-row lg:justify-center lg:items-center'>
-                <div className='w-full h-1/2 lg:w-1/3 lg:h-1/2'>
-                    <img className='w-full h-5/6 lg:w-full lg:h-full object-contain bg-center' src={product.image} alt={product.title} />
-                </div>
-                <div className='w-full h-full lg:w-1/3 lg:h-full'>
-                    <div className='w-full md:max-lg:w-5/6 flex flex-col md:mt-10'>
-                        <h1 className='text-xl font-bold text-black w-full mx-2 lg:mt-2'>{product.title}</h1>
+        <div className='container mx-auto px-4 py-8'>
+            <div className='bg-white rounded-lg shadow-lg p-6'>
+                <div className='grid grid-cols-1 lg:grid-cols-3 gap-8'>
+                    {/* Columna de imagen */}
+                    <div className='flex items-center justify-center'>
+                        <img
+                            className='max-h-[400px] w-auto object-contain'
+                            src={product.image}
+                            alt={product.title}
+                        />
                     </div>
-                    <div className='lg:w-1/3 flex gap-2 my-3'>
-                        <p className='flex flex-row text-lg ml-2 font-bold text-yellow-500'>{product.rating.rate} </p>
-                        <img src={star} alt='star' className='w-5 h-full mt-0.5 ' />
+
+                    {/* Columna de información */}
+                    <div className='space-y-4 p-4'>
+                        <h1 className='text-xl font-bold text-black'>{product.title}</h1>
+
+                        <div className='flex gap-2 items-center'>
+                            <p className='text-lg font-bold text-yellow-500'>{product.rating.rate}</p>
+                            <img src={star} alt='star' className='w-5 h-5' />
+                        </div>
+
+                        <p className='text-4xl font-bold text-blue-500'>${product.price}</p>
+
+                        <div className='flex gap-2'>
+                            <p className='text-lg font-bold'>Category:</p>
+                            <p className='text-lg text-green-500 font-bold'>{product.category}</p>
+                        </div>
+
+                        <div className='space-y-4'>
+                            <p className='text-lg font-bold'>Description:</p>
+                            <p className='text-lg text-slate-700'>{product.description}</p>
+                        </div>
                     </div>
-                    <div className='w-full flex my-5'>
-                        <p className='text-lg ml-2 w-full text-blue-500 text-4xl font-bold w-full'>${product.price}</p>
-                    </div>
-                    <div className='w-full flex flex-row my-5'>
-                        <p className='text-lg ml-2 text-lg font-bold'>Category:</p>
-                        <p className='text-lg ml-2 text-lg text-green-500 font-bold'>{product.category}</p>
-                    </div>
-                    <div className='w-[90%] lg:w-full flex flex-col mr-2'>
-                        <p className='text-lg ml-2 my-3 w-full font-bold '>Description:</p>
-                        <p className='text-lg ml-2 w-full text-slate-700'>{product.description}</p>
-                    </div>
-                </div>
-                <div className='lg:w-1/3 h-full flex flex-col lg:ml-2'>
-                    <div className='w-full h-full lg:ml-2 lg:border-2 lg:rounded-lg'>
-                        <div className='w-full mt-10 ml-2'>
-                            <p className='text-lg w-full text-slate-700 mt-2 text-left'>
-                                <span className='text-lg font-bold text-green-500'>Get it free tomorrow</span> for being your first purchase
+
+                    {/* Columna de compra */}
+                    <div className='border-2 rounded-lg p-4 space-y-4'>
+                        <div>
+                            <p className='text-lg text-slate-700'>
+                                <span className='font-bold text-green-500'>Get it free tomorrow</span>
+                                for being your first purchase
                             </p>
                         </div>
-                        <div className='w-full my-5 ml-2'>
+
+                        <div>
                             <p className='text-lg font-bold text-green-500'>Free return</p>
                             <p className='text-lg text-slate-700'>You have 30 days from when you receive it.</p>
                         </div>
-                        <div className='w-full my-5 ml-2'>
+
+                        <div>
                             <p className='text-lg text-slate-800 font-bold'>Stock available</p>
                             <p>Amount: {product.rating.count}</p>
                         </div>
-                        <div className='w-full flex flex-col px-2'>
-                            <div className='flex items-center gap-2 mb-3 lg:ml-2'>
+
+                        <div className='space-y-3'>
+                            <div className='flex items-center gap-2'>
                                 <label htmlFor="quantity" className='text-lg font-bold'>
                                     Quantity:
                                 </label>
@@ -83,17 +96,27 @@ const CardDetails = (product) => {
                                     ))}
                                 </select>
                             </div>
-                            <Link to='/login' className='bg-blue-500 hover:bg-blue-600 rounded-2xl text-white text-lg w-full text-center py-2 mx-auto my-2' >Buy Now</Link>
+
+                            <Link
+                                to='/login'
+                                className='block bg-blue-500 hover:bg-blue-600 rounded-2xl text-white text-lg w-full text-center py-2'
+                            >
+                                Buy Now
+                            </Link>
+
                             <button
                                 onClick={handleAddToCart}
-                                className='text-lg py-2 w-full rounded-2xl border-2 border-blue-500 hover:bg-blue-300 my-2' >Add to Cart</button>
+                                className='w-full text-lg py-2 rounded-2xl border-2 border-blue-500 hover:bg-blue-300'
+                            >
+                                Add to Cart
+                            </button>
                         </div>
-                        <div className='w-full h-1/2 md:max-lg:h-9/10 lg:h-auto mt-12 lg:mt-4'>
-                            <h1 className='text-lg text-slate-500 font-bold ml-2 mb-2'>Payments Methods:</h1>
+
+                        <div className='space-y-2'>
+                            <h1 className='text-lg text-slate-500 font-bold'>Payments Methods:</h1>
                             <Payment />
                         </div>
                     </div>
-
                 </div>
             </div>
         </div>
