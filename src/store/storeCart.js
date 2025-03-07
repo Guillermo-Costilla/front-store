@@ -1,7 +1,7 @@
 import { create } from "zustand"
 
 const useCartStore = create((set) => ({
-    cartItems: [],
+    cartItems: {},
 
     addToCart: (product) => 
         set((state) => {
@@ -19,7 +19,7 @@ const useCartStore = create((set) => ({
             }
             // Si el producto no existe, añádelo al carrito
             return {
-                cartItems: [...state.cartItems, product]
+                cartItems: {...state.cartItems, product}
             }
         }),
 
@@ -29,7 +29,7 @@ const useCartStore = create((set) => ({
         })),
 
     clearCart: () => 
-        set({ cartItems: [] }),
+        set({ cartItems: {} }),
 }))
 
 export default useCartStore

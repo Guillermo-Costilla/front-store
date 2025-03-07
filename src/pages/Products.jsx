@@ -19,7 +19,7 @@ const Products = () => {
     return (
 
 
-        <div className='text-black text-2xl w-full h-screen flex flex-col'>
+        <div className='text-black text-2xl w-full h-screen flex flex-1 flex-col'>
             {/* Barra de búsqueda */}
             <div className='w-full max-w-md mx-auto my-4'>
                 <input
