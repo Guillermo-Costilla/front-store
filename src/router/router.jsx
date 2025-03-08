@@ -5,6 +5,9 @@ import ProductsDetails from '../pages/productsDetails'
 import Cart from '../pages/Cart'
 import LogIn from '../pages/login'
 import Register from '../pages/register'
+import Coupon from '../pages/Coupon';
+import Offers from '../pages/Offers';
+import About from '../pages/About';
 
 
 
@@ -24,7 +27,15 @@ const router = createBrowserRouter([
             {
                 path: '/cart',
                 element: <Cart />
-
+            }, {
+                path: '/coupon',
+                element: <Coupon />
+            }, {
+                path: '/offers',
+                element: <Offers />
+            }, {
+                path: '/about',
+                element: <About />
             }
         ]
     },
@@ -36,6 +47,7 @@ const router = createBrowserRouter([
         path: '/register',
         element: <Register />
     }
+
 
 ])
 

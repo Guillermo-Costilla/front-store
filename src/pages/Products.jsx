@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
 import { useStoreApi } from "../store/storeApi";
-import Card from '../components/Card';
 import { Link } from 'react-router-dom';
+import Card from '../components/Card';
+import TopBanner from '../components/TopBanner'
 import CircularProgress from '../components/CircularIndeterminate';
 
 const Products = () => {
@@ -20,6 +21,7 @@ const Products = () => {
 
 
         <div className='text-black text-2xl w-full h-screen flex flex-1 flex-col'>
+            <TopBanner />
             {/* Barra de búsqueda */}
             <div className='w-full max-w-md mx-auto my-4'>
                 <input
