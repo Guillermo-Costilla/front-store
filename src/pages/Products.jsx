@@ -39,7 +39,7 @@ const Products = () => {
                 {products && products.length > 0 ? (
                     filteredProducts.length > 0 ? (
                         filteredProducts.map(product => (
-                            <Link to={`${product.id}`} key={product.id}>
+                            <Link to={`/${product.id}`} key={product.id}>
                                 <Card key={product.id} product={product} />
                             </Link>
                         ))

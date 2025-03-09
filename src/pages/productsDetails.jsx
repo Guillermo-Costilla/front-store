@@ -1,29 +1,26 @@
-import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
-import axios from "axios";
-import CardDetails from "../components/CardDetails.jsx";
-import apiUrl from "../api.js";
+import { useEffect } from 'react';
+import { useParams } from 'react-router-dom';
+import { useStoreApi } from '../store/storeApi';
+import CardDetails from '../components/CardDetails';
+import CircularProgress from '../components/CircularIndeterminate';
 
 const ProductsDetails = () => {
     const { id } = useParams();
-    const [products, setProducts] = useState();
+    const { currentProduct, getProductById } = useStoreApi();
 
     useEffect(() => {
-        axios.get(`${apiUrl}/products/${id}`)
-            .then(response => setProducts(response.data))
-            .catch(error => console.log(error));
+        getProductById(id);
+    }, [id, getProductById]);
 
-    }, [id]);
+    if (!currentProduct) {
+        return (
+            <div className='h-screen flex justify-center items-center'>
+                <CircularProgress />
+            </div>
+        );
+    }
 
-
-    return (
-        <div>
-            {products && (
-                <CardDetails {...products} />
-            )}
-        </div>
-
-    );
+    return <CardDetails {...currentProduct} />;
 };
 
 export default ProductsDetails;
