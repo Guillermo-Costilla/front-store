@@ -17,7 +17,7 @@ const useCartStore = create((set) => ({
                     )
                 }
             }
-            // Si el producto no existe, añádelo al carrito
+            // Si el producto no existe, lo añade al carrito
             return {
                 cartItems: [...state.cartItems, product]
             }

@@ -1,14 +1,13 @@
 import { Disclosure, DisclosureButton, DisclosurePanel, Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/react'
 import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline'
-import { Link, useLocation } from 'react-router-dom'
-import defaultPhoto from '../assets/avatar.png'
-import { useStoreReg } from '../store/useStoreReg'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 import store from '../assets/store.png'
 import useCartStore from '../store/storeCart'
+import useAuthStore from '../store/useAuthStore'
 
 const navigation = [
   { name: 'Home', href: '/' },
-  { name: 'Coupon', href: '/coupon' },
+  { name: 'Orders', href: '/orders' },
   { name: 'Offers', href: '/offers' },
   { name: 'About', href: '/about' },
 ]
@@ -19,12 +18,14 @@ function classNames(...classes) {
 
 export default function NavBar() {
   const location = useLocation();
-  const { user, userLogout } = useStoreReg()
-  const cartItems = useCartStore((state) => state.cartItems)
+  const navigate = useNavigate();
+  const { user, isAuthenticated, logout } = useAuthStore();
+  const cartItems = useCartStore((state) => state.cartItems);
   const cartItemsCount = cartItems.reduce((total, item) => total + item.quantity, 0);
 
   const handleLogout = () => {
-    userLogout()
+    logout();
+    navigate('/login');
   }
 
   return (
@@ -95,9 +96,9 @@ export default function NavBar() {
                       <span className="absolute -inset-1.5" />
                       <span className="sr-only">Open user menu</span>
                       <img
-                        alt=""
-                        src={user ? user.image : defaultPhoto}
-                        className="size-8 rounded-full"
+                        alt="Foto de perfil"
+                        src={user?.imagen || 'https://ejemplo.com/default-avatar.png'}
+                        className="size-8 object-cover rounded-full"
                       />
                     </MenuButton>
                   </div>
@@ -105,31 +106,44 @@ export default function NavBar() {
                   <MenuItems
                     className="absolute right-0 z-10 mt-2 w-48 origin-top-right rounded-md bg-white py-1 ring-1 shadow-lg ring-black/5 transition focus:outline-hidden data-closed:scale-95 data-closed:transform data-closed:opacity-0 data-enter:duration-100 data-enter:ease-out data-leave:duration-75 data-leave:ease-in"
                   >
-                    <MenuItem>
-                      <Link
-                        to={user ? '/profile' : '/login'}
-                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                      >
-                        {user ? 'Profile' : 'Login'}
-                      </Link>
-                    </MenuItem>
-                    <MenuItem>
-                      <Link
-                        to={user ? '/My purchases' : 'register'}
-                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                      >
-                        {user ? 'My purchases' : 'Register'}
-                      </Link>
-                    </MenuItem>
-                    {user && (
-                      <MenuItem>
-                        <button
-                          onClick={handleLogout}
-                          className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                        >
-                          Sign out
-                        </button>
-                      </MenuItem>
+                    {isAuthenticated ? (
+                      <>
+                        <MenuItem>
+                          <Link
+                            to="/profile"
+                            className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                          >
+                            Mi Perfil
+                          </Link>
+                        </MenuItem>
+                        <MenuItem>
+                          <button
+                            onClick={handleLogout}
+                            className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                          >
+                            Cerrar Sesión
+                          </button>
+                        </MenuItem>
+                      </>
+                    ) : (
+                      <>
+                        <MenuItem>
+                          <Link
+                            to="/login"
+                            className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                          >
+                            Iniciar Sesión
+                          </Link>
+                        </MenuItem>
+                        <MenuItem>
+                          <Link
+                            to="/register"
+                            className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                          >
+                            Registrarse
+                          </Link>
+                        </MenuItem>
+                      </>
                     )}
                   </MenuItems>
                 </Menu>

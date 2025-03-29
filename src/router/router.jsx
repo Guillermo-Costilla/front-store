@@ -1,15 +1,27 @@
-import { createBrowserRouter } from 'react-router-dom';
+import { createBrowserRouter, Navigate } from 'react-router-dom';
 import Main from '../layouts/main';
 import Products from '../pages/Products'
 import ProductsDetails from '../pages/productsDetails'
 import Cart from '../pages/Cart'
 import LogIn from '../pages/login'
 import Register from '../pages/register'
-import Coupon from '../pages/Coupon';
+import Profile from '../pages/Profile'
 import Offers from '../pages/Offers';
+import Orders from '../pages/Orders';
 import About from '../pages/About';
+import Payments from '../payment/Payment';
+import useAuthStore from '../store/useAuthStore';
 
 
+const ProtectedRoute = ({ children }) => {
+    const isAuthenticated = useAuthStore.getState().isAuthenticated;
+
+    if (!isAuthenticated) {
+        return <Navigate to="/login" replace />;
+    }
+
+    return children;
+};
 
 const router = createBrowserRouter([
     {
@@ -26,29 +38,50 @@ const router = createBrowserRouter([
             },
             {
                 path: '/cart',
-                element: <Cart />
-            }, {
-                path: '/coupon',
-                element: <Coupon />
-            }, {
+                element: (
+                    <ProtectedRoute>
+                        <Cart />
+                    </ProtectedRoute>
+                )
+            },
+            {
+                path: '/profile',
+                element: (
+                    <ProtectedRoute>
+                        <Profile />
+                    </ProtectedRoute>
+                )
+            },
+            {
+                path: '/orders',
+                element: <Orders />
+            },
+            {
                 path: '/offers',
                 element: <Offers />
-            }, {
+            },
+            {
                 path: '/about',
                 element: <About />
-            }
+            },
+            {
+                path: '/payment',
+                element: (
+                    <ProtectedRoute>
+                        <Payments />
+                    </ProtectedRoute>
+                )
+            },
         ]
     },
     {
         path: '/login',
         element: <LogIn />
-
-    }, {
+    },
+    {
         path: '/register',
         element: <Register />
     }
-
-
 ])
 
 export default router;

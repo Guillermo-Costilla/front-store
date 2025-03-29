@@ -1,4 +1,3 @@
-import { Link } from 'react-router-dom'
 import { useState } from 'react'
 import star from '../assets/star.png'
 import useCartStore from '../store/storeCart'
@@ -96,13 +95,6 @@ const CardDetails = (product) => {
                                     ))}
                                 </select>
                             </div>
-
-                            <Link
-                                to='/login'
-                                className='block bg-blue-500 hover:bg-blue-600 rounded-2xl text-white text-lg w-full text-center py-2'
-                            >
-                                Buy Now
-                            </Link>
 
                             <button
                                 onClick={handleAddToCart}
