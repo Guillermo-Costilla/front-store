@@ -146,7 +146,7 @@ const StripePayment = () => {
 
         try {
             const amount = Math.round(cartItems.reduce((total, item) => total + item.price * item.quantity, 0) * 100);
-            const { data } = await axios.post('http://localhost:5000/api/payments/process-pay', {
+            const { data } = await axios.post('https://store-backend-7ws5.onrender.com/api/payments/process-pay', {
                 token: 'tok_visa',
                 amount,
                 currency: 'usd',
