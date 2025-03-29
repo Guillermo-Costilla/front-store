@@ -25,8 +25,8 @@ const Login = () => {
   }
 
   return (
-    <div className="w-full h-screen flex flex-col justify-center items-center">
-      <div className="flex min-h-full flex-1 flex-col justify-center px-6 py-12 lg:px-8 w-1/3">
+    <div className="flex items-center justify-center w-full h-screen">
+      <div className="flex min-h-full flex-1 flex-col justify-center px-6 py-12 lg:px-8 w-full max-w-md">
         <div className='w-full shadow-xl rounded-lg'>
           <div className="sm:mx-auto sm:w-full sm:max-w-sm my-2 w-full">
             <img
@@ -34,8 +34,8 @@ const Login = () => {
               src="https://e7.pngegg.com/pngimages/549/560/png-clipart-computer-icons-login-scalable-graphics-email-accountability-blue-logo-thumbnail.png"
               className="mx-auto h-10 w-auto"
             />
-            <h2 className="mt-10 text-center text-2xl/9 font-bold tracking-tight text-gray-900">
-              Sign in
+            <h2 className="mt-10 text-center text-2xl font-bold tracking-tight text-gray-900">
+              Iniciar Sesión
             </h2>
           </div>
 
@@ -47,7 +47,7 @@ const Login = () => {
                 </div>
               )}
               <div>
-                <label htmlFor="email" className="block text-sm/6 font-medium text-gray-900">
+                <label htmlFor="email" className="block text-sm font-medium text-gray-900">
                   Email
                 </label>
                 <div className="mt-2">
@@ -64,12 +64,12 @@ const Login = () => {
 
               <div>
                 <div className="flex items-center justify-between">
-                  <label htmlFor="password" className="block text-sm/6 font-medium text-gray-900">
-                    Password
+                  <label htmlFor="password" className="block text-sm font-medium text-gray-900">
+                    Contraseña
                   </label>
                   <div className="text-sm">
                     <a href="#" className="font-semibold text-indigo-600 hover:text-indigo-500">
-                      ¿Forgot your password?
+                      ¿Olvidaste tu contraseña?
                     </a>
                   </div>
                 </div>
@@ -88,17 +88,17 @@ const Login = () => {
               <div>
                 <button
                   type="submit"
-                  className="flex w-full justify-center rounded-md bg-indigo-600 px-3 py-1.5 text-sm/6 font-semibold text-white shadow-xs hover:bg-indigo-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+                  className="flex w-full justify-center rounded-md bg-indigo-600 px-3 py-1.5 text-sm font-semibold text-white shadow-xs hover:bg-indigo-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
                 >
-                  Login
+                  Iniciar Sesión
                 </button>
               </div>
             </form>
 
-            <p className="mt-10 text-center text-sm/6 text-gray-500">
-              ¿Don't have an account?{' '}
+            <p className="mt-10 text-center text-sm text-gray-500">
+              ¿No tienes una cuenta?{' '}
               <Link to="/register" className="font-semibold text-indigo-600 hover:text-indigo-500">
-                Register
+                Regístrate
               </Link>
             </p>
           </div>

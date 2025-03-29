@@ -45,100 +45,95 @@ const Register = () => {
     }
 
     return (
-        <div className='w-full h-screen flex flex-col justify-center items-center'>
-            <div className='w-full h-full flex flex-col justify-center items-center'>
-                <form onSubmit={handleSignup} className='w-1/3 p-6 card text-black shadow-xl rounded-lg'>
-                    <h2 className='text-center font-bold text-3xl w-full mb-6'>Register</h2>
-                    {error && (
-                        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-6" role="alert">
-                            <span className="block sm:inline">{error}</span>
-                        </div>
-                    )}
-                    <div className="relative z-0 w-full mb-6 group">
-                        <input
-                            onChange={handleInput}
-                            type="text"
-                            name="nombre"
-                            id="floating_name"
-                            className="block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none focus:outline-none focus:ring-0 focus:border-blue-600 peer"
-                            placeholder=" "
-                            required
-                        />
-                        <label htmlFor="floating_name" className="peer-focus:font-medium absolute text-sm text-gray-500 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:left-0 peer-focus:text-blue-600 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6">
-                            Name and last name:
-                        </label>
-                    </div>
-                    <div className="relative z-0 w-full mb-6 group">
-                        <input
-                            onChange={handleInput}
-                            type="email"
-                            name="email"
-                            id="floating_email"
-                            className="block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none focus:outline-none focus:ring-0 focus:border-blue-600 peer"
-                            placeholder=" "
-                            required
-                        />
-                        <label htmlFor="floating_email" className="peer-focus:font-medium absolute text-sm text-gray-500 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:left-0 peer-focus:text-blue-600 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6">
-                            Email:
-                        </label>
-                    </div>
-                    <div className="relative z-0 w-full mb-6 group">
-                        <input
-                            onChange={handleInput}
-                            type="password"
-                            name="password"
-                            id="floating_password"
-                            className="block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none focus:outline-none focus:ring-0 focus:border-blue-600 peer"
-                            placeholder=" "
-                            required
-                        />
-                        <label htmlFor="floating_password" className="peer-focus:font-medium absolute text-sm text-gray-500 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:left-0 peer-focus:text-blue-600 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6">
-                            Password:
-                        </label>
-                    </div>
-                    <div className="relative z-0 w-full mb-6 group">
-                        <input
-                            onChange={handleInput}
-                            type="url"
-                            name="imagen"
-                            id="floating_image"
-                            className="block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none focus:outline-none focus:ring-0 focus:border-blue-600 peer"
-                            placeholder=" "
-                        />
-                        <label htmlFor="floating_image" className="peer-focus:font-medium absolute text-sm text-gray-500 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:left-0 peer-focus:text-blue-600 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6">
-                            Image URL (optional)
-                        </label>
-                        {formData.imagen && (
-                            <div className="mt-2">
-                                <img
-                                    src={formData.imagen}
-                                    alt="Vista previa"
-                                    className="w-20 h-20 object-cover rounded-full"
-                                    onError={(e) => {
-                                        e.target.onerror = null;
-                                        setError('La URL de la imagen no es válida');
-                                        setFormData(prev => ({ ...prev, imagen: '' }));
-                                    }}
-                                />
-                            </div>
-                        )}
+        <div className='flex items-center justify-center w-full h-screen'>
+            <div className='flex min-h-full flex-1 flex-col justify-center px-6 py-12 lg:px-8 w-full max-w-md'>
+                <div className='w-full shadow-xl rounded-lg'>
+                    <div className="sm:mx-auto sm:w-full sm:max-w-sm my-2 w-full">
+                        <h2 className='mt-10 text-center text-2xl font-bold tracking-tight text-gray-900'>
+                            Registro
+                        </h2>
                     </div>
 
-                    <div className="flex gap-4">
-                        <button
-                            type="submit"
-                            className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full px-5 py-2.5 text-center"
-                        >
-                            Register
-                        </button>
-                        <Link
-                            to="/login"
-                            className="text-white bg-gray-700 hover:bg-gray-800 focus:ring-4 focus:outline-none focus:ring-gray-300 font-medium rounded-lg text-sm w-full px-5 py-2.5 text-center"
-                        >
-                            Back to login
-                        </Link>
+                    <div className="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
+                        <form onSubmit={handleSignup} className="space-y-6">
+                            {error && (
+                                <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-6" role="alert">
+                                    <span className="block sm:inline">{error}</span>
+                                </div>
+                            )}
+                            <div>
+                                <label className="block text-gray-700 text-sm font-bold mb-2">
+                                    Nombre
+                                </label>
+                                <input
+                                    onChange={handleInput}
+                                    type="text"
+                                    name="nombre"
+                                    id="floating_name"
+                                    className="block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none focus:outline-none focus:ring-0 focus:border-blue-600 peer"
+                                    placeholder=" "
+                                    required
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-gray-700 text-sm font-bold mb-2">
+                                    Email
+                                </label>
+                                <input
+                                    onChange={handleInput}
+                                    type="email"
+                                    name="email"
+                                    id="floating_email"
+                                    className="block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none focus:outline-none focus:ring-0 focus:border-blue-600 peer"
+                                    placeholder=" "
+                                    required
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-gray-700 text-sm font-bold mb-2">
+                                    Contraseña
+                                </label>
+                                <input
+                                    onChange={handleInput}
+                                    type="password"
+                                    name="password"
+                                    id="floating_password"
+                                    className="block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none focus:outline-none focus:ring-0 focus:border-blue-600 peer"
+                                    placeholder=" "
+                                    required
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-gray-700 text-sm font-bold mb-2">
+                                    URL de la imagen (opcional)
+                                </label>
+                                <input
+                                    onChange={handleInput}
+                                    type="url"
+                                    name="imagen"
+                                    id="floating_image"
+                                    className="block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none focus:outline-none focus:ring-0 focus:border-blue-600 peer"
+                                    placeholder=" "
+                                />
+                            </div>
+
+                            <div>
+                                <button
+                                    type="submit"
+                                    className="flex w-full justify-center rounded-md bg-indigo-600 px-3 py-1.5 text-sm font-semibold text-white shadow-xs hover:bg-indigo-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+                                >
+                                    Registrarse
+                                </button>
+                            </div>
+                            <p className="mt-10 text-center text-sm text-gray-500">
+                                ¿Ya tienes una cuenta?{' '}
+                                <Link to="/login" className="font-semibold text-indigo-600 hover:text-indigo-500">
+                                    Iniciar Sesión
+                                </Link>
+                            </p>
+                        </form>
                     </div>
-                </form>
+                </div>
             </div>
         </div>
     )
