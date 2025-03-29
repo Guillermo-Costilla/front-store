@@ -21,10 +21,10 @@ const CheckoutForm = ({ processPayment }) => {
     };
 
     return (
-        <form onSubmit={handleSubmit} className="flex max-w-7xl mx-auto p-8 bg-white rounded-lg shadow-lg space-x-8">
+        <form onSubmit={handleSubmit} className="flex flex-col max-w-7xl mx-auto p-8 bg-white rounded-lg shadow-lg space-y-8">
             {/* Parte izquierda: productos en el carrito */}
             <div className="flex-1 p-4 border-r border-gray-300">
-                <h2 className="text-2xl font-semibold text-gray-800 mb-4">Purchase Summary</h2>
+                <h2 className="text-2xl font-semibold text-gray-800 mb-4">Resumen de Compra</h2>
                 <ul className="space-y-6">
                     {/* Mostrar productos del carrito */}
                     {cartItems.length > 0 ? (
@@ -36,13 +36,13 @@ const CheckoutForm = ({ processPayment }) => {
                                     <span className="text-gray-800 font-medium">{item.title}</span>
                                 </div>
                                 <div className="flex flex-col items-end">
-                                    <span className="text-gray-500">Quantity: {item.quantity}</span>
+                                    <span className="text-gray-500">Cantidad: {item.quantity}</span>
                                     <span className="text-gray-800 font-semibold">${(item.price * item.quantity).toFixed(2)}</span>
                                 </div>
                             </li>
                         ))
                     ) : (
-                        <p className="text-gray-500">You have no products in your shopping cart..</p>
+                        <p className="text-gray-500">No tienes productos en tu carrito.</p>
                     )}
                 </ul>
                 <div className="mt-6 flex justify-between text-lg font-semibold">
@@ -53,7 +53,7 @@ const CheckoutForm = ({ processPayment }) => {
 
             {/* Parte derecha: Formulario de pago */}
             <div className="flex-1 p-4">
-                <h2 className="text-2xl font-semibold text-gray-800 mb-4">Payment details</h2>
+                <h2 className="text-2xl font-semibold text-gray-800 mb-4">Detalles de Pago</h2>
 
                 {/* Correo electrónico */}
                 <div className="mb-4">
@@ -69,7 +69,7 @@ const CheckoutForm = ({ processPayment }) => {
 
                 {/* Stripe Card Element */}
                 <div className="mb-4">
-                    <label htmlFor="card" className="block text-gray-700">Card number</label>
+                    <label htmlFor="card" className="block text-gray-700">Número de tarjeta</label>
                     <CardElement
                         id="card"
                         className="w-full p-3 border border-gray-300 rounded-md mt-2"
@@ -98,7 +98,7 @@ const CheckoutForm = ({ processPayment }) => {
 
                 {/* Nombre del titular */}
                 <div className="mb-4">
-                    <label htmlFor="name" className="block text-gray-700">First Name Card</label>
+                    <label htmlFor="name" className="block text-gray-700">Nombre del titular</label>
                     <input
                         type="text"
                         id="name"
@@ -110,7 +110,7 @@ const CheckoutForm = ({ processPayment }) => {
 
                 {/* Región o país */}
                 <div className="mb-4">
-                    <label htmlFor="region" className="block text-gray-700">Region or country</label>
+                    <label htmlFor="region" className="block text-gray-700">Región o país</label>
                     <input
                         type="text"
                         id="region"
@@ -124,9 +124,9 @@ const CheckoutForm = ({ processPayment }) => {
                 <button
                     type="submit"
                     disabled={!stripe}
-                    className="w-full py-3 bg-indigo-600 text-white font-semibold rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 disabled:bg-gray-300 disabled:cursor-not-allowed"
+                    className="w-full py-3 bg-indigo-600 text-white font-semibold rounded-md hover:bg-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 disabled:bg-gray-300 disabled:cursor-not-allowed"
                 >
-                    Pay
+                    Pagar
                 </button>
             </div>
         </form>

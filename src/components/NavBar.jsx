@@ -97,7 +97,7 @@ export default function NavBar() {
                       <span className="sr-only">Open user menu</span>
                       <img
                         alt="Foto de perfil"
-                        src={user?.imagen || 'https://ejemplo.com/default-avatar.png'}
+                        src={user.imagen}
                         className="size-8 object-cover rounded-full"
                       />
                     </MenuButton>
@@ -113,7 +113,7 @@ export default function NavBar() {
                             to="/profile"
                             className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                           >
-                            Mi Perfil
+                            Mi Profile
                           </Link>
                         </MenuItem>
                         <MenuItem>
@@ -121,7 +121,7 @@ export default function NavBar() {
                             onClick={handleLogout}
                             className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                           >
-                            Cerrar Sesión
+                            Log out
                           </button>
                         </MenuItem>
                       </>
@@ -132,7 +132,7 @@ export default function NavBar() {
                             to="/login"
                             className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                           >
-                            Iniciar Sesión
+                            Sign in
                           </Link>
                         </MenuItem>
                         <MenuItem>
@@ -140,7 +140,7 @@ export default function NavBar() {
                             to="/register"
                             className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                           >
-                            Registrarse
+                            Register
                           </Link>
                         </MenuItem>
                       </>

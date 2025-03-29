@@ -58,15 +58,15 @@ const Profile = () => {
             <div className="container mx-auto px-4">
                 <div className="flex items-center justify-center w-full">
                     {/* Perfil */}
-                    <div className="w-1/3 bg-white p-6 rounded-lg shadow-lg">
-                        <div className="flex justify-between items-center mb-6 border-1 border-slate-900">
-                            <h2 className="text-2xl font-bold">Mi Perfil</h2>
+                    <div className="w-full max-w-md bg-white p-6 rounded-lg shadow-lg">
+                        <div className="flex justify-between items-center mb-6">
+                            <h2 className="text-2xl font-bold">Mi Profile</h2>
                             {!isEditing && (
                                 <button
                                     onClick={() => setIsEditing(true)}
                                     className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
                                 >
-                                    Editar Perfil
+                                    Edit
                                 </button>
                             )}
                         </div>
@@ -83,7 +83,7 @@ const Profile = () => {
                                     </div>
                                 </div>
                                 <div className="border-b pb-2">
-                                    <p className="text-gray-600 text-sm">Nombre</p>
+                                    <p className="text-gray-600 text-sm">Name</p>
                                     <p className="font-semibold">{user?.nombre}</p>
                                 </div>
                                 <div className="border-b pb-2">
@@ -100,12 +100,13 @@ const Profile = () => {
                                 )}
                                 {success && (
                                     <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative">
-                                        <span className="block sm:inline">Perfil actualizado correctamente</span>
+                                        <span className="block sm:inline">
+                                            Profile updated successfully</span>
                                     </div>
                                 )}
                                 <div>
                                     <label className="block text-gray-700 text-sm font-bold mb-2">
-                                        Nombre
+                                        Name
                                     </label>
                                     <input
                                         type="text"
@@ -129,7 +130,7 @@ const Profile = () => {
                                 </div>
                                 <div>
                                     <label className="block text-gray-700 text-sm font-bold mb-2">
-                                        URL de la imagen
+                                        Image URL
                                     </label>
                                     <input
                                         type="url"
@@ -144,7 +145,7 @@ const Profile = () => {
                                         type="submit"
                                         className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline flex-1"
                                     >
-                                        Guardar Cambios
+                                        Save changes
                                     </button>
                                     <button
                                         type="button"
@@ -158,7 +159,7 @@ const Profile = () => {
                                         }}
                                         className="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline flex-1"
                                     >
-                                        Cancelar
+                                        Cancel
                                     </button>
                                 </div>
                             </form>
