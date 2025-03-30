@@ -5,7 +5,7 @@ import Swal from 'sweetalert2'
 
 const Register = () => {
     const navigate = useNavigate();
-    const [register, user] = useAuthStore((state) => state.register);
+    const register = useAuthStore((state) => state.register);
     const [error, setError] = useState(null);
     const [formData, setFormData] = useState({
         nombre: '',
@@ -37,7 +37,7 @@ const Register = () => {
         if (result.success) {
             Swal.fire({
                 title: "¡Success!",
-                text: "¡Welcome " + user.name + "!",
+                text: "¡Register Sucess!",
                 icon: "success",
                 confirmButtonText: "Lets Go!",
             });
