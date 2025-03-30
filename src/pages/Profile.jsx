@@ -15,6 +15,10 @@ const Profile = () => {
         imagen: user?.imagen || '',
     })
 
+    console.log(user);
+
+    const defaultPhoto = "https://e7.pngegg.com/pngimages/549/560/png-clipart-computer-icons-login-scalable-graphics-email-accountability-blue-logo-thumbnail.png";
+
     // Actualizar formData cuando cambie el usuario
     useEffect(() => {
         setFormData({
@@ -44,6 +48,7 @@ const Profile = () => {
             // Actualizar el formData con los datos más recientes del usuario
             const updatedUser = useAuthStore.getState().user;
             setFormData({
+                ...formData,
                 nombre: updatedUser?.nombre || '',
                 email: updatedUser?.email || '',
                 imagen: updatedUser?.imagen || '',
@@ -76,9 +81,13 @@ const Profile = () => {
                                 <div className="flex justify-center mb-6">
                                     <div className="w-32 h-32 rounded-full overflow-hidden">
                                         <img
-                                            src={user?.imagen}
+                                            src={user?.imagen || defaultPhoto}
                                             alt="Foto de perfil"
                                             className="w-full h-full object-cover"
+                                            onError={(e) => {
+                                                e.target.onerror = null; // Evitar bucles infinitos
+                                                e.target.src = defaultPhoto; // Establecer la imagen por defecto si hay un error
+                                            }}
                                         />
                                     </div>
                                 </div>

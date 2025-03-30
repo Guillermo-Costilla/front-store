@@ -13,6 +13,8 @@ const Register = () => {
         imagen: ''
     });
 
+    console.log(formData);
+
     const isValidUrl = (string) => {
         try {
             new URL(string);
@@ -42,6 +44,7 @@ const Register = () => {
 
     const handleInput = (e) => {
         setFormData({ ...formData, [e.target.name]: e.target.value })
+
     }
 
     return (
@@ -50,12 +53,12 @@ const Register = () => {
                 <div className='w-full shadow-xl rounded-lg'>
                     <div className="sm:mx-auto sm:w-full sm:max-w-sm my-2 w-full">
                         <h2 className='mt-10 text-center text-2xl font-bold tracking-tight text-gray-900'>
-                            Registro
+                            Register
                         </h2>
                     </div>
 
                     <div className="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
-                        <form onSubmit={handleSignup} className="space-y-6">
+                        <form onSubmit={handleSignup} className="p-4">
                             {error && (
                                 <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-6" role="alert">
                                     <span className="block sm:inline">{error}</span>
@@ -63,7 +66,7 @@ const Register = () => {
                             )}
                             <div>
                                 <label className="block text-gray-700 text-sm font-bold mb-2">
-                                    Nombre
+                                    Name and las name
                                 </label>
                                 <input
                                     onChange={handleInput}
@@ -91,7 +94,7 @@ const Register = () => {
                             </div>
                             <div>
                                 <label className="block text-gray-700 text-sm font-bold mb-2">
-                                    Contraseña
+                                    Password
                                 </label>
                                 <input
                                     onChange={handleInput}
@@ -105,7 +108,7 @@ const Register = () => {
                             </div>
                             <div>
                                 <label className="block text-gray-700 text-sm font-bold mb-2">
-                                    URL de la imagen (opcional)
+                                    URL image (optional)
                                 </label>
                                 <input
                                     onChange={handleInput}
@@ -122,13 +125,13 @@ const Register = () => {
                                     type="submit"
                                     className="flex w-full justify-center rounded-md bg-indigo-600 px-3 py-1.5 text-sm font-semibold text-white shadow-xs hover:bg-indigo-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
                                 >
-                                    Registrarse
+                                    Register
                                 </button>
                             </div>
                             <p className="mt-10 text-center text-sm text-gray-500">
-                                ¿Ya tienes una cuenta?{' '}
+                                ¿Forgot account?{' '}
                                 <Link to="/login" className="font-semibold text-indigo-600 hover:text-indigo-500">
-                                    Iniciar Sesión
+                                    Log in
                                 </Link>
                             </p>
                         </form>
