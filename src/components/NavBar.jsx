@@ -22,6 +22,7 @@ export default function NavBar() {
   const { user, isAuthenticated, logout } = useAuthStore();
   const cartItems = useCartStore((state) => state.cartItems);
   const cartItemsCount = cartItems.reduce((total, item) => total + item.quantity, 0);
+  const defaultPhoto = "https://e7.pngegg.com/pngimages/549/560/png-clipart-computer-icons-login-scalable-graphics-email-accountability-blue-logo-thumbnail.png";
 
   const handleLogout = () => {
     logout();
@@ -97,7 +98,8 @@ export default function NavBar() {
                       <span className="sr-only">Open user menu</span>
                       <img
                         alt="Foto de perfil"
-                        src={user.imagen}
+
+                        src={user?.imagen || defaultPhoto}
                         className="size-8 object-cover rounded-full"
                       />
                     </MenuButton>
