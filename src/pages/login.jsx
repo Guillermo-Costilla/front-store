@@ -1,6 +1,7 @@
 import { useState } from "react"
 import { Link, useNavigate } from "react-router-dom"
 import useAuthStore from "../store/useAuthStore"
+import Swal from 'sweetalert2'
 
 const Login = () => {
   const navigate = useNavigate();
@@ -18,9 +19,22 @@ const Login = () => {
 
     const result = await login(credentials);
     if (result.success) {
+      Swal.fire({
+        position: "top-end",
+        icon: "success",
+        title: "Log in success",
+        showConfirmButton: false,
+        timer: 1500
+      });
       navigate('/');
     } else {
       setError(result.error);
+      Swal.fire({
+        title: "Error!",
+        text: result.error,
+        icon: "error",
+        confirmButtonText: "Close",
+      });
     }
   }
 
@@ -85,7 +99,7 @@ const Login = () => {
                 </div>
               </div>
 
-              <div classname='py-4'>
+              <div className='py-4'>
                 <button
                   type="submit"
                   className="my-10 flex w-full justify-center rounded-md bg-indigo-600 px-3 py-1.5 text-sm font-semibold text-white shadow-xs hover:bg-indigo-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"

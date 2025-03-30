@@ -10,12 +10,10 @@ const Profile = () => {
     const [success, setSuccess] = useState(false)
     const [isEditing, setIsEditing] = useState(false)
     const [formData, setFormData] = useState({
-        nombre: user?.nombre || '',
-        email: user?.email || '',
-        imagen: user?.imagen || '',
+        nombre: '',
+        email: '',
+        imagen: '',
     })
-
-    console.log(user);
 
     const defaultPhoto = "https://e7.pngegg.com/pngimages/549/560/png-clipart-computer-icons-login-scalable-graphics-email-accountability-blue-logo-thumbnail.png";
 
@@ -58,7 +56,6 @@ const Profile = () => {
         }
     }
 
-    console.log('Este es el usuario: ', user);
 
     return (
         <div className="flex items-center justify-center w-full h-screen">

@@ -1,10 +1,11 @@
 import { useState } from "react"
 import { Link, useNavigate } from "react-router-dom"
 import useAuthStore from "../store/useAuthStore"
+import Swal from 'sweetalert2'
 
 const Register = () => {
     const navigate = useNavigate();
-    const register = useAuthStore((state) => state.register);
+    const [register, user] = useAuthStore((state) => state.register);
     const [error, setError] = useState(null);
     const [formData, setFormData] = useState({
         nombre: '',
@@ -12,8 +13,6 @@ const Register = () => {
         password: '',
         imagen: ''
     });
-
-    console.log(formData);
 
     const isValidUrl = (string) => {
         try {
@@ -36,9 +35,21 @@ const Register = () => {
 
         const result = await register(formData);
         if (result.success) {
+            Swal.fire({
+                title: "¡Success!",
+                text: "¡Welcome " + user.name + "!",
+                icon: "success",
+                confirmButtonText: "Lets Go!",
+            });
             navigate('/login');
         } else {
             setError(result.error);
+            Swal.fire({
+                title: "Error!",
+                text: result.error,
+                icon: "error",
+                confirmButtonText: "Close",
+            });
         }
     }
 
@@ -108,7 +119,7 @@ const Register = () => {
                             </div>
                             <div className='mb-10'>
                                 <label className="block text-gray-700 text-sm font-bold mb-2">
-                                    URL image (optional)
+                                    URL image
                                 </label>
                                 <input
                                     onChange={handleInput}
