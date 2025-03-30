@@ -58,6 +58,8 @@ const Profile = () => {
         }
     }
 
+    console.log('Este es el usuario: ', user);
+
     return (
         <div className="flex items-center justify-center w-full h-screen">
             <div className="container mx-auto px-4">
@@ -66,14 +68,7 @@ const Profile = () => {
                     <div className="w-full max-w-md bg-white p-6 rounded-lg shadow-lg">
                         <div className="flex justify-between items-center mb-6">
                             <h2 className="text-2xl font-bold">Mi Profile</h2>
-                            {!isEditing && (
-                                <button
-                                    onClick={() => setIsEditing(true)}
-                                    className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-                                >
-                                    Edit
-                                </button>
-                            )}
+
                         </div>
 
                         {!isEditing ? (
