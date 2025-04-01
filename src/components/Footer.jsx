@@ -2,7 +2,7 @@ import store from '../assets/store.png'
 
 const Footer = () => {
     return (
-        <footer className="mt-auto bg-white text-gray-800 shadow-lg">
+        <footer className="mt-auto bg-white text-gray-800 shadow-t-lg">
             <div className="w-full flex flex-col sm:flex-row items-center justify-between py-6 px-10 space-y-6 sm:space-y-0">
                 {/* Logo con animación */}
                 <div className="flex justify-center">
