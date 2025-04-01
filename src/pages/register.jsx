@@ -27,8 +27,8 @@ const Register = () => {
         if (result.success) {
             // Mostrar alerta animada de éxito
             Swal.fire({
-                title: "¡Registro Exitoso!",
-                text: "Tu cuenta ha sido creada correctamente",
+                title: "¡Succes!",
+                text: "¡Register Sucess!",
                 icon: "success",
                 showConfirmButton: false,
                 timer: 2000, // Se cierra automáticamente en 2 segundos
