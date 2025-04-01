@@ -36,7 +36,7 @@ const OrderDetails = ({ orderId }) => {
     }
 
     return (
-        <div className="bg-white rounded-lg shadow-lg p-6">
+        <div className="bg-white rounded-lg shadow-lg p-6 mt-20">
             <div className="border-b pb-4 mb-4">
                 <div className="flex justify-between items-center">
                     <h3 className="text-xl font-bold">Orden #{currentOrder.id}</h3>

@@ -1,30 +1,69 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import star from '../assets/star.png'
 import useCartStore from '../store/storeCart'
 import Swal from 'sweetalert2'
 import Payment from '../components/Payment'
 
 
+const SkeletonLoader = () => (
+    <div className="animate-pulse grid grid-cols-1 lg:grid-cols-3 gap-6 container mx-auto px-4 py-8 mt-20">
+        {/* Imagen */}
+        <div className="flex items-center justify-center">
+            <div className="bg-gray-300 h-[400px] w-full max-w-[350px] rounded-lg"></div>
+        </div>
+
+        {/* Información del producto */}
+        <div className="space-y-4 px-4 mt-10">
+            <div className="bg-gray-300 h-6 w-3/4 rounded"></div>
+            <div className="bg-gray-300 h-4 w-1/3 rounded"></div>
+            <div className="bg-gray-300 h-10 w-1/2 rounded"></div>
+            <div className="bg-gray-300 h-4 w-1/4 rounded"></div>
+            <div className="bg-gray-300 h-16 w-full rounded"></div>
+        </div>
+
+        {/* Columna de compra */}
+        <div className="border rounded-xl p-6 shadow-md space-y-4">
+            <div className="bg-gray-300 h-6 w-2/3 rounded"></div>
+            <div className="bg-gray-300 h-4 w-1/2 rounded"></div>
+            <div className="bg-gray-300 h-6 w-1/4 rounded"></div>
+            <div className="bg-gray-300 h-10 w-full rounded"></div>
+        </div>
+    </div>
+);
+
+
 const CardDetails = (product) => {
 
     const addToCart = useCartStore((state) => state.addToCart)
     const [quantity, setQuantity] = useState(1)
+    const [isLoading, setIsLoading] = useState(true);
+
+    useEffect(() => {
+        // Simulamos una carga de datos con un pequeño delay
+        setTimeout(() => {
+            setIsLoading(false);
+        }, 1500);
+    }, []);
 
     const handleAddToCart = () => {
         const productWithQuantity = {
             ...product,
-            quantity: quantity
-        }
-        addToCart(productWithQuantity)
+            quantity: quantity,
+        };
+        addToCart(productWithQuantity);
         Swal.fire({
-            title: "Products add to cart",
+            title: "Product added to cart",
             icon: "success",
-            draggable: true
+            draggable: true,
         });
+    };
+
+    if (isLoading) {
+        return <SkeletonLoader />;
     }
 
     return (
-        <div className='container mx-auto px-4 py-8'>
+        <div className='container mx-auto px-4 py-8 mt-20'>
             <div className='bg-white rounded-lg shadow-lg p-6'>
                 <div className='grid grid-cols-1 lg:grid-cols-3 gap-8'>
                     {/* Columna de imagen */}

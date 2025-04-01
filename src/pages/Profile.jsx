@@ -61,145 +61,59 @@ const Profile = () => {
         <div className="flex items-center justify-center w-full h-screen">
             <div className="container mx-auto px-4">
                 <div className="flex items-center justify-center w-full">
-                    {/* Perfil */}
-                    <div className="w-full max-w-md bg-white p-6 rounded-lg shadow-lg">
+                    {/* Perfil con animaciones */}
+                    <div className="w-full max-w-md bg-white p-6 rounded-lg shadow-xl hover:shadow-2xl transition-all duration-300 transform scale-100 hover:scale-105">
                         <div className="flex justify-between items-center mb-6">
-                            <h2 className="text-2xl font-bold">Mi Profile</h2>
-
+                            <h2 className="text-2xl font-bold opacity-90 transition-opacity duration-300 hover:opacity-100">
+                                Mi Profile
+                            </h2>
                         </div>
 
-                        {!isEditing ? (
-                            <div className="space-y-4">
-                                <div className="flex justify-center mb-6">
-                                    <div className="w-32 h-32 rounded-full overflow-hidden">
-                                        <img
-                                            src={user?.imagen || defaultPhoto}
-                                            alt="Foto de perfil"
-                                            className="w-full h-full object-cover"
-                                            onError={(e) => {
-                                                e.target.onerror = null; // Evitar bucles infinitos
-                                                e.target.src = defaultPhoto; // Establecer la imagen por defecto si hay un error
-                                            }}
-                                        />
-                                    </div>
-                                </div>
-                                <div className="border-b pb-2">
-                                    <p className="text-gray-600 text-sm">Name</p>
-                                    <p className="font-semibold">{user?.nombre}</p>
-                                </div>
-                                <div className="border-b pb-2">
-                                    <p className="text-gray-600 text-sm">Email</p>
-                                    <p className="font-semibold">{user?.email}</p>
-                                </div>
+                        {/* Imagen de perfil */}
+                        <div className="flex justify-center mb-6">
+                            <div className="w-32 h-32 rounded-full overflow-hidden border-2 border-gray-300 hover:border-gray-500 transition-all duration-300">
+                                <img
+                                    src={user?.imagen || defaultPhoto}
+                                    alt="Foto de perfil"
+                                    className="w-full h-full object-cover transition-all duration-300 hover:scale-105"
+                                    onError={(e) => {
+                                        e.target.onerror = null;
+                                        e.target.src = defaultPhoto;
+                                    }}
+                                />
                             </div>
-                        ) : (
-                            <form onSubmit={handleSubmit} className="space-y-4">
-                                {error && (
-                                    <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative">
-                                        <span className="block sm:inline">{error}</span>
-                                    </div>
-                                )}
-                                {success && (
-                                    <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative">
-                                        <span className="block sm:inline">
-                                            Profile updated successfully</span>
-                                    </div>
-                                )}
-                                <div>
-                                    <label className="block text-gray-700 text-sm font-bold mb-2">
-                                        Name
-                                    </label>
-                                    <input
-                                        type="text"
-                                        name="nombre"
-                                        value={formData.nombre}
-                                        onChange={handleInput}
-                                        className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                                    />
-                                </div>
-                                <div>
-                                    <label className="block text-gray-700 text-sm font-bold mb-2">
-                                        Email
-                                    </label>
-                                    <input
-                                        type="email"
-                                        name="email"
-                                        value={formData.email}
-                                        onChange={handleInput}
-                                        className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                                    />
-                                </div>
-                                <div>
-                                    <label className="block text-gray-700 text-sm font-bold mb-2">
-                                        Image URL
-                                    </label>
-                                    <input
-                                        type="url"
-                                        name="imagen"
-                                        value={formData.imagen}
-                                        onChange={handleInput}
-                                        className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                                    />
-                                </div>
-                                <div className="flex gap-4">
-                                    <button
-                                        type="submit"
-                                        className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline flex-1"
-                                    >
-                                        Save changes
-                                    </button>
-                                    <button
-                                        type="button"
-                                        onClick={() => {
-                                            setIsEditing(false)
-                                            setFormData({
-                                                nombre: user?.nombre || '',
-                                                email: user?.email || '',
-                                                imagen: user?.imagen || '',
-                                            })
-                                        }}
-                                        className="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline flex-1"
-                                    >
-                                        Cancel
-                                    </button>
-                                </div>
-                            </form>
-                        )}
-                    </div>
-
-                    {/* Pedidos 
-                    <div className="bg-white p-6 rounded-lg shadow-lg">
-                        <h2 className="text-2xl font-bold mb-6">Mis Pedidos</h2>
-                        <div className="space-y-4">
-                            {orders.map((order) => (
-                                <div key={order.id} className="border rounded-lg p-4">
-                                    <div className="flex justify-between items-center mb-2">
-                                        <span className="font-bold">Pedido #{order.id}</span>
-                                        <span className="px-2 py-1 rounded text-sm font-semibold bg-yellow-100 text-yellow-800">
-                                            {order.status || 'Pendiente'}
-                                        </span>
-                                    </div>
-                                    <div className="space-y-2">
-                                        {order.products.map((product) => (
-                                            <div key={product.id} className="flex justify-between items-center">
-                                                <span>{product.title}</span>
-                                                <span className="font-semibold">${product.price}</span>
-                                            </div>
-                                        ))}
-                                    </div>
-                                    <div className="mt-4 pt-4 border-t">
-                                        <div className="flex justify-between items-center">
-                                            <span className="font-bold">Total:</span>
-                                            <span className="font-bold">${order.total}</span>
-                                        </div>
-                                    </div>
-                                </div>
-                            ))}
-                            {orders.length === 0 && (
-                                <p className="text-gray-500 text-center">No tienes pedidos aún</p>
-                            )}
                         </div>
-                    </div> */}
+
+                        {/* Datos del usuario */}
+                        <div className="space-y-4">
+                            <div className="border-b pb-2">
+                                <p className="text-gray-600 text-sm">Name</p>
+                                <p className="font-semibold">{user?.nombre || "Nombre Predeterminado"}</p>
+                            </div>
+                            <div className="border-b pb-2">
+                                <p className="text-gray-600 text-sm">Email</p>
+                                <p className="font-semibold">{user?.email || "email@example.com"}</p>
+                            </div>
+
+                            {/* Ubicación estática */}
+                            <div className="border-b pb-2">
+                                <p className="text-gray-600 text-sm">Country</p>
+                                <p className="font-semibold">Argentina</p>
+                            </div>
+                            <div className="border-b pb-2">
+                                <p className="text-gray-600 text-sm">Province</p>
+                                <p className="font-semibold">Tucumán</p>
+                            </div>
+                            <div className="border-b pb-2">
+                                <p className="text-gray-600 text-sm">City</p>
+                                <p className="font-semibold">San Miguel de Tucumán</p>
+                            </div>
+                            <div className="border-b pb-2">
+                                <p className="text-gray-600 text-sm">Postal Code</p>
+                                <p className="font-semibold">4000</p>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
