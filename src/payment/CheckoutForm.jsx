@@ -1,12 +1,10 @@
-"use client"
-
 import { useState } from "react"
 import { useStripe, useElements, CardElement } from "@stripe/react-stripe-js"
 import PropTypes from "prop-types"
 import Swal from "sweetalert2"
 import { motion } from "framer-motion"
 import { CreditCard, Mail, User, Globe, ShieldCheck, Lock, AlertCircle, ChevronRight } from "lucide-react"
-import { handlePaymentError, PaymentError, PaymentErrorTypes } from '..payment/errorHandler';
+import { handlePaymentError, PaymentError, PaymentErrorTypes } from './errorHandler';
 
 const CheckoutForm = ({ processPayment, cartItems, clientSecret }) => {
     const stripe = useStripe()
