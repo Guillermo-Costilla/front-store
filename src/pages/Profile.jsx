@@ -58,7 +58,7 @@ const Profile = () => {
 
 
     return (
-        <div className="flex items-center justify-center w-full h-screen">
+        <div className="flex items-center justify-center w-full min-h-screen">
             <div className="container mx-auto px-4">
                 <div className="flex items-center justify-center w-full">
                     {/* Perfil con animaciones */}
