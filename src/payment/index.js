@@ -1,31 +1,14 @@
-/**
- * Archivo principal que exporta todos los componentes y servicios del módulo de pagos
- */
-
-// Componentes
-export { default as StripePayment } from './Payment';
-export { default as CheckoutForm } from './CheckoutForm';
-
-// Servicios
-export { processPaymentRequest } from './paymentService';
-
-// Manejo de errores
-export { 
-  handlePaymentError, 
-  PaymentError, 
-  PaymentErrorTypes 
-} from './errorHandler';
-
-// Tests (solo para entornos de desarrollo)
-export { 
-  testPagoExitoso, 
-  testEscenariosFallo,
-  runAllTests
-} from './test';
-
-// Configuración
+// Configuración para el servicio de pagos
 export const PAYMENT_CONFIG = {
-  API_URL: 'https://store-backend-7ws5.onrender.com/api/payments',
-  TIMEOUT: 15000, // Aumentado a 15 segundos
-  STRIPE_PUBLIC_KEY: 'pk_test_51R0DGDCr7qNJfD5UIOTV4XrH9AMY9IYk6IaenLpZoTlYQAOwNAvWBYJMbcIJhjTlGIaONa80Vi1NB55HxD9hbCN10010FtOXzM'
-};
+  // URL base para las solicitudes de pago
+  API_URL: "https://store-backend-7ws5.onrender.com/api/payments",
+
+  // Tiempo máximo de espera para las solicitudes (en milisegundos)
+  TIMEOUT: 30000, // 30 segundos
+
+  // Número de intentos de reintento para solicitudes fallidas
+  RETRY_ATTEMPTS: 2,
+}
+
+// Exportar otros componentes o configuraciones según sea necesario
+export * from "./errorHandler"

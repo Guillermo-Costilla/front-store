@@ -1,6 +1,5 @@
 import axios from 'axios';
-import { PaymentError, PaymentErrorTypes, handlePaymentError } from './errorHandler';
-import { PAYMENT_CONFIG } from './index';
+import { PaymentError, PaymentErrorTypes } from './errorHandler';
 
 /**
  * Valida los datos de pago antes de enviarlos al servidor
@@ -44,20 +43,64 @@ const validatePaymentData = (paymentData) => {
  */
 export const processPaymentRequest = async (paymentData) => {
   try {
-    const response = await axios.post(`${PAYMENT_CONFIG.API_URL}/process-pay`, paymentData, {
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      timeout: PAYMENT_CONFIG.TIMEOUT
-    });
+    // Validar datos antes de enviar al servidor
+    validatePaymentData(paymentData);
 
-    return response.data;
-  } catch (error) {
-    throw new PaymentError(
-      'Error al procesar el pago',
-      PaymentErrorTypes.PAYMENT_FAILED,
-      { originalError: error.message }
+    console.log('Enviando solicitud de pago con token:', paymentData.token);
+
+    // Realizar la petición al servidor
+    const { data } = await axios.post(
+      'https://store-backend-7ws5.onrender.com/api/payments/process-pay',
+      paymentData,
+      {
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        timeout: 10000 // Timeout en 10 segundos
+      }
     );
+
+    if (!data) {
+      throw new PaymentError(
+        'La respuesta del servidor no contiene datos', 
+        PaymentErrorTypes.SERVER
+      );
+    }
+
+    console.log('Pago procesado exitosamente:', data);
+    return { success: true, data };
+  } catch (error) {
+    // Si ya es un error personalizado, lo pasamos como está
+    if (error instanceof PaymentError) {
+      throw error;
+    }
+    
+    // Manejo específico según el tipo de error
+    if (error.response) {
+      // Error con respuesta del servidor
+      const errorMessage = error.response.data?.message || 
+                          `Error del servidor: ${error.response.status}`;
+      console.error('Error del servidor:', error.response.data);
+      throw new PaymentError(
+        errorMessage, 
+        PaymentErrorTypes.SERVER, 
+        { status: error.response.status }
+      );
+    } else if (error.request) {
+      // Error sin respuesta del servidor (timeout, red, etc)
+      console.error('No se recibió respuesta del servidor:', error.request);
+      throw new PaymentError(
+        'No se pudo conectar con el servidor de pagos. Verifica tu conexión a internet', 
+        PaymentErrorTypes.NETWORK
+      );
+    } else {
+      // Error en la configuración de la solicitud u otro error
+      console.error('Error en la solicitud de pago:', error.message);
+      throw new PaymentError(
+        error.message || 'Error desconocido en el proceso de pago', 
+        PaymentErrorTypes.UNKNOWN
+      );
+    }
   }
 };
 
@@ -139,67 +182,4 @@ export const getCardToken = async (cardDetails) => {
       PaymentErrorTypes.CARD
     );
   }
-};
-
-/**
- * Crea un intent de pago
- * @param {number} amount - Monto del pago
- * @returns {Promise<string>} - Client secret del intent de pago
- * @throws {PaymentError} - Error al crear el intent de pago
- */
-export const createPaymentIntent = async (amount) => {
-  if (!amount || amount <= 0) {
-    throw new PaymentError(
-      'El monto del pago es inválido',
-      PaymentErrorTypes.VALIDATION
-    );
-  }
-
-  try {
-    const response = await axios.post(`${PAYMENT_CONFIG.API_URL}/create-payment-intent`, {
-      amount: Math.round(amount * 100), // Convertir a centavos
-      currency: 'usd',
-      payment_method_types: ['card']
-    }, {
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      timeout: PAYMENT_CONFIG.TIMEOUT
-    });
-
-    if (!response.data || !response.data.clientSecret) {
-      console.error('Respuesta del servidor:', response.data);
-      throw new PaymentError(
-        'El servidor no devolvió un token de pago válido',
-        PaymentErrorTypes.SERVER
-      );
-    }
-
-    return response.data.clientSecret;
-
-  } catch (error) {
-    console.error('Error completo:', error);
-
-    if (error.response) {
-      // Error con respuesta del servidor
-      throw new PaymentError(
-        `Error del servidor: ${error.response.data?.message || 'Error desconocido'}`,
-        PaymentErrorTypes.SERVER,
-        { statusCode: error.response.status }
-      );
-    } else if (error.request) {
-      // Error de red
-      throw new PaymentError(
-        'No se pudo conectar con el servidor de pagos',
-        PaymentErrorTypes.NETWORK
-      );
-    } else {
-      // Error de configuración u otro
-      throw new PaymentError(
-        'Error al procesar la solicitud de pago',
-        PaymentErrorTypes.UNKNOWN,
-        { originalError: error.message }
-      );
-    }
-  }
-};
+}; 
