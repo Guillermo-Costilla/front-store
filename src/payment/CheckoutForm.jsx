@@ -6,7 +6,7 @@ import { motion } from "framer-motion"
 import { CreditCard, Mail, User, Globe, ShieldCheck, Lock, AlertCircle, ChevronRight } from "lucide-react"
 import { handlePaymentError, PaymentError, PaymentErrorTypes } from './errorHandler';
 
-const CheckoutForm = ({ processPayment, cartItems, clientSecret }) => {
+const CheckoutForm = ({ processPayment, cartItems }) => {
     const stripe = useStripe()
     const elements = useElements()
     const [isLoading, setIsLoading] = useState(false)
@@ -40,7 +40,7 @@ const CheckoutForm = ({ processPayment, cartItems, clientSecret }) => {
     const handleSubmit = async (event) => {
         event.preventDefault();
 
-        if (!stripe || !elements || !clientSecret) {
+        if (!stripe || !elements) {
             console.error("No se puede procesar el pago");
             return;
         }
@@ -49,53 +49,28 @@ const CheckoutForm = ({ processPayment, cartItems, clientSecret }) => {
         setActiveStep(2);
 
         try {
-            const { paymentIntent, error: stripeError } = await stripe.confirmCardPayment(
-                clientSecret,
-                {
-                    payment_method: {
-                        card: elements.getElement(CardElement),
-                        billing_details: {
-                            name: formData.name,
-                            email: formData.email,
-                        },
-                    },
+            const { error, paymentMethod } = await stripe.createPaymentMethod({
+                type: 'card',
+                card: elements.getElement(CardElement),
+                billing_details: {
+                    name: formData.name,
+                    email: formData.email,
                 }
-            );
+            });
 
-            if (stripeError) {
-                // Manejar errores específicos de Stripe
-                switch (stripeError.code) {
-                    case 'card_declined':
-                    case 'expired_card':
-                    case 'incorrect_cvc':
-                    case 'processing_error':
-                    case 'insufficient_funds':
-                        throw new PaymentError(
-                            stripeError.message,
-                            PaymentErrorTypes.CARD,
-                            { code: stripeError.code }
-                        );
-                    default:
-                        throw new PaymentError(
-                            'Error al procesar el pago',
-                            PaymentErrorTypes.UNKNOWN
-                        );
-                }
-            }
-
-            if (paymentIntent.status === 'succeeded') {
-                // Pago exitoso
-                setActiveStep(3);
-                await processPayment({
-                    paymentIntent: paymentIntent,
-                    formData: formData
-                });
-            } else {
+            if (error) {
                 throw new PaymentError(
-                    'El pago no pudo ser completado',
-                    PaymentErrorTypes.PAYMENT_FAILED
+                    error.message,
+                    PaymentErrorTypes.CARD,
+                    { code: error.code }
                 );
             }
+
+            setActiveStep(3);
+            await processPayment({
+                paymentMethodId: paymentMethod.id,
+                ...formData
+            });
 
         } catch (error) {
             console.error("Error en el pago:", error);
@@ -429,7 +404,6 @@ const ShoppingBagIcon = ({ className }) => (
 CheckoutForm.propTypes = {
     processPayment: PropTypes.func.isRequired,
     cartItems: PropTypes.array.isRequired,
-    clientSecret: PropTypes.string.isRequired,
 }
 
 export default CheckoutForm

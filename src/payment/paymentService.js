@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { PaymentError, PaymentErrorTypes } from './errorHandler';
+import { PaymentError, PaymentErrorTypes, handlePaymentError } from './errorHandler';
 import { PAYMENT_CONFIG } from './index';
 
 /**
@@ -44,10 +44,20 @@ const validatePaymentData = (paymentData) => {
  */
 export const processPaymentRequest = async (paymentData) => {
   try {
-    const response = await axios.post(PAYMENT_CONFIG.API_URL, paymentData);
+    const response = await axios.post(`${PAYMENT_CONFIG.API_URL}/process-pay`, paymentData, {
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      timeout: PAYMENT_CONFIG.TIMEOUT
+    });
+
     return response.data;
   } catch (error) {
-    throw error;
+    throw new PaymentError(
+      'Error al procesar el pago',
+      PaymentErrorTypes.PAYMENT_FAILED,
+      { originalError: error.message }
+    );
   }
 };
 
@@ -135,17 +145,61 @@ export const getCardToken = async (cardDetails) => {
  * Crea un intent de pago
  * @param {number} amount - Monto del pago
  * @returns {Promise<string>} - Client secret del intent de pago
- * @throws {Error} - Error al crear el intent de pago
+ * @throws {PaymentError} - Error al crear el intent de pago
  */
 export const createPaymentIntent = async (amount) => {
+  if (!amount || amount <= 0) {
+    throw new PaymentError(
+      'El monto del pago es inválido',
+      PaymentErrorTypes.VALIDATION
+    );
+  }
+
   try {
     const response = await axios.post(`${PAYMENT_CONFIG.API_URL}/create-payment-intent`, {
       amount: Math.round(amount * 100), // Convertir a centavos
-      currency: 'usd'
+      currency: 'usd',
+      payment_method_types: ['card']
+    }, {
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      timeout: PAYMENT_CONFIG.TIMEOUT
     });
-    
+
+    if (!response.data || !response.data.clientSecret) {
+      console.error('Respuesta del servidor:', response.data);
+      throw new PaymentError(
+        'El servidor no devolvió un token de pago válido',
+        PaymentErrorTypes.SERVER
+      );
+    }
+
     return response.data.clientSecret;
+
   } catch (error) {
-    throw new Error('Error al crear el intent de pago: ' + error.message);
+    console.error('Error completo:', error);
+
+    if (error.response) {
+      // Error con respuesta del servidor
+      throw new PaymentError(
+        `Error del servidor: ${error.response.data?.message || 'Error desconocido'}`,
+        PaymentErrorTypes.SERVER,
+        { statusCode: error.response.status }
+      );
+    } else if (error.request) {
+      // Error de red
+      throw new PaymentError(
+        'No se pudo conectar con el servidor de pagos',
+        PaymentErrorTypes.NETWORK
+      );
+    } else {
+      // Error de configuración u otro
+      throw new PaymentError(
+        'Error al procesar la solicitud de pago',
+        PaymentErrorTypes.UNKNOWN,
+        { originalError: error.message }
+      );
+    }
   }
 };

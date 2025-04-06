@@ -1,43 +1,20 @@
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback } from "react";
 import { loadStripe } from "@stripe/stripe-js";
 import { Elements } from "@stripe/react-stripe-js";
 import useCartStore from '../store/storeCart';
 import CheckoutForm from './CheckoutForm';
-import { processPaymentRequest, createPaymentIntent } from './paymentService';
-import { handlePaymentError } from './errorHandler';
+import { processPaymentRequest } from './paymentService';
+import { handlePaymentError, PaymentErrorTypes } from './errorHandler';
 import { useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2';
 
 const stripePromise = loadStripe("pk_test_51R0DGDCr7qNJfD5UIOTV4XrH9AMY9IYk6IaenLpZoTlYQAOwNAvWBYJMbcIJhjTlGIaONa80Vi1NB55HxD9hbCN10010FtOXzM");
 
 const StripePayment = () => {
-    const [clientSecret, setClientSecret] = useState(null);
+    const [isLoading, setIsLoading] = useState(false);
     const cartItems = useCartStore((state) => state.cartItems);
     const clearCart = useCartStore((state) => state.clearCart);
     const navigate = useNavigate();
-
-    useEffect(() => {
-        const getClientSecret = async () => {
-            if (cartItems.length > 0) {
-                try {
-                    const amount = cartItems.reduce((total, item) =>
-                        total + item.price * item.quantity, 0
-                    );
-                    const secret = await createPaymentIntent(amount);
-                    setClientSecret(secret);
-                } catch (error) {
-                    console.error("Error al obtener el clientSecret:", error);
-                    Swal.fire({
-                        title: 'Error',
-                        text: 'No se pudo inicializar el pago',
-                        icon: 'error'
-                    });
-                }
-            }
-        };
-
-        getClientSecret();
-    }, [cartItems]);
 
     const processPayment = useCallback(async (formData = {}) => {
         if (cartItems.length === 0) {
@@ -50,21 +27,13 @@ const StripePayment = () => {
             return;
         }
 
-        // Verificar que tengamos un token de pago válido
-        if (!formData.paymentMethodId) {
-            Swal.fire({
-                title: 'Validation Error',
-                text: 'Card information has not been validated correctly.',
-                icon: 'error',
-                confirmButtonText: 'Ok'
-            });
-            return;
-        }
-
         try {
-            const amount = Math.round(cartItems.reduce((total, item) => total + item.price * item.quantity, 0) * 100);
+            const amount = Math.round(cartItems.reduce((total, item) =>
+                total + item.price * item.quantity, 0
+            ) * 100);
+
             const paymentData = {
-                token: formData.paymentMethodId, // Usar el token de pago de Stripe
+                token: formData.paymentMethodId,
                 amount,
                 currency: 'usd',
                 description: 'Pago de productos en carrito - 2025',
@@ -76,7 +45,6 @@ const StripePayment = () => {
                 }
             };
 
-            // Mostrar confirmación antes de procesar el pago
             const confirmResult = await Swal.fire({
                 title: 'Confirm pay',
                 text: `Are you sure about making the payment by $${(amount / 100).toFixed(2)}?`,
@@ -87,18 +55,10 @@ const StripePayment = () => {
             });
 
             if (!confirmResult.isConfirmed) {
-                return; // El usuario canceló el pago
+                return;
             }
 
-            // Mostrar carga mientras procesamos el pago
-            Swal.fire({
-                title: 'Processing payment',
-                text: 'Please wait while we process your payment...',
-                allowOutsideClick: false,
-                didOpen: () => {
-                    Swal.showLoading();
-                }
-            });
+            setIsLoading(true);
 
             const response = await processPaymentRequest(paymentData);
 
@@ -113,12 +73,10 @@ const StripePayment = () => {
                     navigate('/');
                 });
             } else {
-                throw new Error('Respuesta de pago inválida');
+                throw new Error('Invalid payment response');
             }
         } catch (error) {
-            console.error("Error al procesar el pago:", error);
-
-            // Usar el manejador de errores para obtener información detallada
+            console.error("Error processing payment:", error);
             const errorInfo = handlePaymentError(error);
 
             Swal.fire({
@@ -127,22 +85,25 @@ const StripePayment = () => {
                 icon: 'error',
                 confirmButtonText: 'Try again'
             });
+        } finally {
+            setIsLoading(false);
         }
     }, [cartItems, clearCart, navigate]);
 
     return (
         <Elements stripe={stripePromise}>
-            {clientSecret ? (
+            {isLoading ? (
+                <div className="min-h-screen flex items-center justify-center bg-gray-50">
+                    <div className="text-center">
+                        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto"></div>
+                        <p className="mt-4 text-gray-600">Inicializando pago...</p>
+                    </div>
+                </div>
+            ) : (
                 <CheckoutForm
                     processPayment={processPayment}
                     cartItems={cartItems}
-                    clientSecret={clientSecret}
                 />
-            ) : (
-                <div className="text-center py-8">
-                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto"></div>
-                    <p className="mt-4 text-gray-600">Inicializando pago...</p>
-                </div>
             )}
         </Elements>
     );

@@ -14,12 +14,13 @@ export class PaymentError extends Error {
  * Tipos de errores de pago
  */
 export const PaymentErrorTypes = {
-  VALIDATION: 'VALIDATION_ERROR',
-  SERVER: 'SERVER_ERROR',
-  NETWORK: 'NETWORK_ERROR',
-  TIMEOUT: 'TIMEOUT_ERROR',
-  CARD: 'CARD_ERROR',
-  UNKNOWN: 'UNKNOWN_ERROR'
+    VALIDATION: 'VALIDATION_ERROR',
+    SERVER: 'SERVER_ERROR',
+    NETWORK: 'NETWORK_ERROR',
+    TIMEOUT: 'TIMEOUT_ERROR',
+    CARD: 'CARD_ERROR',
+    PAYMENT_FAILED: 'PAYMENT_FAILED',
+    UNKNOWN: 'UNKNOWN_ERROR'
 };
 
 /**
@@ -28,41 +29,45 @@ export const PaymentErrorTypes = {
  * @returns {Object} - Objeto con información del error para mostrar al usuario
  */
 export const handlePaymentError = (error) => {
-  // Error personalizado de pago
-  if (error instanceof PaymentError) {
-    return {
-      title: obtenerTituloError(error.code),
-      message: error.message,
-      code: error.code,
-      details: error.details
-    };
-  }
+    // Error personalizado de pago
+    if (error instanceof PaymentError) {
+        return {
+            title: obtenerTituloError(error.code),
+            message: error.message,
+            code: error.code,
+            details: error.details
+        };
+    }
 
-  // Error de axios/red
-  if (error.response) {
-    return {
-      title: 'Error del servidor',
-      message: error.response.data?.message || 'El servidor rechazó la solicitud de pago.',
-      code: PaymentErrorTypes.SERVER,
-      status: error.response.status
-    };
-  }
+    // Error de axios/red
+    if (error.response) {
+        const serverMessage = error.response.data?.message;
+        return {
+            title: 'Error del servidor',
+            message: serverMessage || 'El servidor no pudo procesar la solicitud de pago.',
+            code: PaymentErrorTypes.SERVER,
+            status: error.response.status,
+            details: {
+                serverMessage,
+                statusCode: error.response.status
+            }
+        };
+    }
 
-  if (error.request) {
-    // Timeout o problema de red
-    return {
-      title: 'Error de conexión',
-      message: 'No se pudo conectar con el servidor de pagos. Verifica tu conexión.',
-      code: PaymentErrorTypes.NETWORK
-    };
-  }
+    if (error.request) {
+        return {
+            title: 'Error de conexión',
+            message: 'No se pudo establecer conexión con el servidor de pagos. Por favor, verifica tu conexión a internet.',
+            code: PaymentErrorTypes.NETWORK
+        };
+    }
 
-  // Error genérico
-  return {
-    title: 'Error en el proceso de pago',
-    message: error.message || 'Ha ocurrido un error inesperado durante el proceso de pago.',
-    code: PaymentErrorTypes.UNKNOWN
-  };
+    return {
+        title: 'Error inesperado',
+        message: 'Ocurrió un error al procesar el pago. Por favor, inténtalo de nuevo.',
+        code: PaymentErrorTypes.UNKNOWN,
+        details: { originalError: error.message }
+    };
 };
 
 /**
@@ -71,18 +76,20 @@ export const handlePaymentError = (error) => {
  * @returns {string} - Título para mostrar al usuario
  */
 const obtenerTituloError = (errorCode) => {
-  switch (errorCode) {
-    case PaymentErrorTypes.VALIDATION:
-      return 'Error en los datos de pago';
-    case PaymentErrorTypes.SERVER:
-      return 'Error en el servidor de pagos';
-    case PaymentErrorTypes.NETWORK:
-      return 'Error de conexión';
-    case PaymentErrorTypes.TIMEOUT:
-      return 'Tiempo de espera agotado';
-    case PaymentErrorTypes.CARD:
-      return 'Error en la tarjeta';
-    default:
-      return 'Error en el proceso de pago';
-  }
-}; 
+    switch (errorCode) {
+        case PaymentErrorTypes.VALIDATION:
+            return 'Error de validación';
+        case PaymentErrorTypes.SERVER:
+            return 'Error en el servidor de pagos';
+        case PaymentErrorTypes.NETWORK:
+            return 'Error de conexión';
+        case PaymentErrorTypes.TIMEOUT:
+            return 'Tiempo de espera agotado';
+        case PaymentErrorTypes.CARD:
+            return 'Error en la tarjeta';
+        case PaymentErrorTypes.PAYMENT_FAILED:
+            return 'Pago fallido';
+        default:
+            return 'Error en el proceso de pago';
+    }
+};
