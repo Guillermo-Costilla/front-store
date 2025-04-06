@@ -6,8 +6,9 @@ import PropTypes from "prop-types"
 import Swal from "sweetalert2"
 import { motion } from "framer-motion"
 import { CreditCard, Mail, User, Globe, ShieldCheck, Lock, AlertCircle, ChevronRight } from "lucide-react"
+import { handlePaymentError, PaymentError, PaymentErrorTypes } from '..payment/errorHandler';
 
-const CheckoutForm = ({ processPayment, cartItems }) => {
+const CheckoutForm = ({ processPayment, cartItems, clientSecret }) => {
     const stripe = useStripe()
     const elements = useElements()
     const [isLoading, setIsLoading] = useState(false)
@@ -41,67 +42,72 @@ const CheckoutForm = ({ processPayment, cartItems }) => {
     const handleSubmit = async (event) => {
         event.preventDefault();
 
-        if (!stripe || !elements) {
-            console.error("Stripe no ha sido inicializado correctamente");
-            return;
-        }
-
-        // Validar que el total no exceda el límite
-        if (total > 999999.99) {
-            Swal.fire({
-                title: "Error en el monto",
-                text: "El monto total no puede exceder $999,999.99",
-                icon: "error",
-                confirmButtonText: "Entendido",
-            });
+        if (!stripe || !elements || !clientSecret) {
+            console.error("No se puede procesar el pago");
             return;
         }
 
         setIsLoading(true);
-        // Avanzar al paso 2 cuando comienza el proceso de pago
         setActiveStep(2);
 
         try {
-            const amountInCents = Math.round(total * 100);
+            const { paymentIntent, error: stripeError } = await stripe.confirmCardPayment(
+                clientSecret,
+                {
+                    payment_method: {
+                        card: elements.getElement(CardElement),
+                        billing_details: {
+                            name: formData.name,
+                            email: formData.email,
+                        },
+                    },
+                }
+            );
 
-            const { error, paymentMethod } = await stripe.createPaymentMethod({
-                type: "card",
-                card: elements.getElement(CardElement),
-                billing_details: {
-                    name: formData.name,
-                    email: formData.email,
-                },
-            });
-
-            if (error) {
-                throw error;
+            if (stripeError) {
+                // Manejar errores específicos de Stripe
+                switch (stripeError.code) {
+                    case 'card_declined':
+                    case 'expired_card':
+                    case 'incorrect_cvc':
+                    case 'processing_error':
+                    case 'insufficient_funds':
+                        throw new PaymentError(
+                            stripeError.message,
+                            PaymentErrorTypes.CARD,
+                            { code: stripeError.code }
+                        );
+                    default:
+                        throw new PaymentError(
+                            'Error al procesar el pago',
+                            PaymentErrorTypes.UNKNOWN
+                        );
+                }
             }
 
-            // Procesar el pago
-            await processPayment({
-                ...formData,
-                paymentMethodId: paymentMethod.id,
-                amount: amountInCents,
-            });
-
-            // Si el pago es exitoso, avanzar al paso 3
-            setActiveStep(3);
-
-            // Mostrar mensaje de éxito
-            Swal.fire({
-                title: "¡Pago exitoso!",
-                text: "Tu compra ha sido procesada correctamente",
-                icon: "success",
-                confirmButtonText: "Aceptar",
-            });
+            if (paymentIntent.status === 'succeeded') {
+                // Pago exitoso
+                setActiveStep(3);
+                await processPayment({
+                    paymentIntent: paymentIntent,
+                    formData: formData
+                });
+            } else {
+                throw new PaymentError(
+                    'El pago no pudo ser completado',
+                    PaymentErrorTypes.PAYMENT_FAILED
+                );
+            }
 
         } catch (error) {
             console.error("Error en el pago:", error);
-            // Si hay error, volver al paso 2
             setActiveStep(2);
+
+            const errorInfo = handlePaymentError(error);
+
             Swal.fire({
-                title: "Error en el pago",
-                text: error.message || "Ocurrió un error al procesar el pago",
+                title: errorInfo.title,
+                text: errorInfo.message,
                 icon: "error",
                 confirmButtonText: "Entendido",
             });
@@ -425,6 +431,7 @@ const ShoppingBagIcon = ({ className }) => (
 CheckoutForm.propTypes = {
     processPayment: PropTypes.func.isRequired,
     cartItems: PropTypes.array.isRequired,
+    clientSecret: PropTypes.string.isRequired,
 }
 
 export default CheckoutForm

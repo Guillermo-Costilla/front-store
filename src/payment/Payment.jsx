@@ -1,9 +1,9 @@
-import { useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { loadStripe } from "@stripe/stripe-js";
 import { Elements } from "@stripe/react-stripe-js";
 import useCartStore from '../store/storeCart';
 import CheckoutForm from './CheckoutForm';
-import { processPaymentRequest } from './paymentService';
+import { processPaymentRequest, createPaymentIntent } from './paymentService';
 import { handlePaymentError } from './errorHandler';
 import { useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2';
@@ -11,9 +11,33 @@ import Swal from 'sweetalert2';
 const stripePromise = loadStripe("pk_test_51R0DGDCr7qNJfD5UIOTV4XrH9AMY9IYk6IaenLpZoTlYQAOwNAvWBYJMbcIJhjTlGIaONa80Vi1NB55HxD9hbCN10010FtOXzM");
 
 const StripePayment = () => {
+    const [clientSecret, setClientSecret] = useState(null);
     const cartItems = useCartStore((state) => state.cartItems);
     const clearCart = useCartStore((state) => state.clearCart);
     const navigate = useNavigate();
+
+    useEffect(() => {
+        const getClientSecret = async () => {
+            if (cartItems.length > 0) {
+                try {
+                    const amount = cartItems.reduce((total, item) =>
+                        total + item.price * item.quantity, 0
+                    );
+                    const secret = await createPaymentIntent(amount);
+                    setClientSecret(secret);
+                } catch (error) {
+                    console.error("Error al obtener el clientSecret:", error);
+                    Swal.fire({
+                        title: 'Error',
+                        text: 'No se pudo inicializar el pago',
+                        icon: 'error'
+                    });
+                }
+            }
+        };
+
+        getClientSecret();
+    }, [cartItems]);
 
     const processPayment = useCallback(async (formData = {}) => {
         if (cartItems.length === 0) {
@@ -108,7 +132,18 @@ const StripePayment = () => {
 
     return (
         <Elements stripe={stripePromise}>
-            <CheckoutForm processPayment={processPayment} cartItems={cartItems} />
+            {clientSecret ? (
+                <CheckoutForm
+                    processPayment={processPayment}
+                    cartItems={cartItems}
+                    clientSecret={clientSecret}
+                />
+            ) : (
+                <div className="text-center py-8">
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto"></div>
+                    <p className="mt-4 text-gray-600">Inicializando pago...</p>
+                </div>
+            )}
         </Elements>
     );
 };
