@@ -4,6 +4,7 @@ import useAuthStore from "../store/useAuthStore";
 import Swal from "sweetalert2";
 import { motion } from "framer-motion";
 import { ClipLoader } from "react-spinners";
+import Button from "../components/ButtonNavigate"
 
 const Login = () => {
   const navigate = useNavigate();
@@ -93,10 +94,13 @@ const Login = () => {
           </motion.button>
         </form>
 
-        <p className="mt-6 text-center text-sm text-gray-500">
-          ¿Don't have an account?{" "}
-          <Link to="/register" className="text-indigo-600 font-semibold">Register</Link>
-        </p>
+        <div className="mt-6 text-center flex flex-1 gap-4 justify-center items-center">
+          <p className="mt-6 text-center text-sm text-gray-500">
+            ¿Don't have an account?{" "}
+            <Link to="/register" className="text-indigo-600 font-semibold">Register</Link>
+          </p>
+          <Button text="Go Home" route="/" />
+        </div>
       </motion.div>
     </div>
   );
