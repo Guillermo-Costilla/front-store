@@ -17,7 +17,7 @@ const Products = () => {
     );
 
     return (
-        <div className="text-black text-2xl w-full min-h-screen flex flex-col items-center bg-gray-50 mt-20">
+        <div className="text-black text-2xl w-full min-h-screen flex flex-col items-center bg-gray-50 my-20">
             <TopBanner />
 
             {/* Barra de búsqueda */}
