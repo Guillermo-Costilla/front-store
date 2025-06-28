@@ -27,7 +27,7 @@ const Card = ({ product }) => {
             setIsAddingToCart(false)
 
             Swal.fire({
-                title: "Product added to cart",
+                title: "Producto añadido al carrito",
                 icon: "success",
                 draggable: true,
             })
@@ -35,18 +35,18 @@ const Card = ({ product }) => {
     }
 
     // Función para formatear el precio
-    const formatPrice = (price) => {
+    const formatPrice = (precio) => {
         return new Intl.NumberFormat("es-ES", {
             style: "currency",
             currency: "USD",
             minimumFractionDigits: 2,
-        }).format(price)
+        }).format(precio)
     }
 
     // Calcular descuento (simulado para demostración)
-    const hasDiscount = product.price > 50
+    const hasDiscount = product.precio > 50
     const discountPercentage = hasDiscount ? 10 : 0
-    const originalPrice = hasDiscount ? product.price * 1.1 : null
+    const originalPrice = hasDiscount ? product.precio * 1.1 : null
 
     return (
         <div
@@ -95,9 +95,9 @@ const Card = ({ product }) => {
                     {/* Imagen con efecto de zoom */}
                     <div className="w-full h-full bg-gray-50 flex items-center justify-center overflow-hidden">
                         <img
-                            src={product.image || "/placeholder.svg"}
-                            alt={product.title}
-                            className={`w-full h-full object-contain transition-transform duration-700 ease-out
+                            src={product.imagen || "/placeholder.svg"}
+                            alt={product.nombre}
+                            className={`w-full h-full object-center transition-transform duration-700 ease-out
                                 ${isHovered ? "scale-110" : "scale-100"}`}
                         />
                     </div>
@@ -115,7 +115,7 @@ const Card = ({ product }) => {
                             aria-label="Añadir al carrito"
                         >
                             <ShoppingCart className="h-4 w-4" />
-                            Add to cart
+                            Añadir al carrito
                         </button>
                     </div>
                 </div>
@@ -125,7 +125,7 @@ const Card = ({ product }) => {
                     {/* Categoría */}
                     <div className="flex items-center gap-1 text-xs text-gray-500 mb-1">
                         <Tag className="h-3 w-3" />
-                        <span>{product.category || "Categoría"}</span>
+                        <span>{product.categoria || "Categoría"}</span>
                     </div>
 
                     {/* Título */}
@@ -133,7 +133,7 @@ const Card = ({ product }) => {
                         className="text-lg font-semibold text-gray-900 line-clamp-2 group-hover:text-indigo-700
                         transition-colors duration-300"
                     >
-                        {product.title}
+                        {product.nombre}
                     </h1>
 
                     {/* Rating real del producto */}
@@ -142,7 +142,7 @@ const Card = ({ product }) => {
                             {[...Array(5)].map((_, i) => (
                                 <Star
                                     key={i}
-                                    className={`h-4 w-4 ${i < Math.floor(product.rating.rate)
+                                    className={`h-4 w-4 ${i < Math.floor(product.puntuacion)
                                         ? 'text-amber-400 fill-current'
                                         : 'text-gray-300'
                                         }`}
@@ -150,7 +150,7 @@ const Card = ({ product }) => {
                             ))}
                         </div>
                         <span className="text-xs text-gray-500">
-                            ({product.rating.count})
+                            ({product.stock})
                         </span>
                     </div>
 
@@ -160,7 +160,7 @@ const Card = ({ product }) => {
                             className="text-xl font-bold text-indigo-600 transition-all duration-300
                             group-hover:text-indigo-700"
                         >
-                            {formatPrice(product.price)}
+                            {formatPrice(product.precio)}
                         </p>
                         {originalPrice && <p className="text-sm text-gray-500 line-through">{formatPrice(originalPrice)}</p>}
                     </div>
@@ -170,7 +170,7 @@ const Card = ({ product }) => {
                             className="bg-blue-500 text-white text-lg relative p-2 rounded-full text-gray-800 hover:text-indigo-600 hover:bg-indigo-50 transition-all duration-200 group"
                             aria-label="Carrito de compras"
                         >
-                            Details
+                            Detalles
                         </button>
                     </div>
                 </div>

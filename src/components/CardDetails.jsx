@@ -55,9 +55,9 @@ const CardDetails = (product) => {
     // Simulamos imágenes adicionales para la galería
     const productImages = product
         ? [
-            product.image,
-            product.image, // Duplicamos para simular más imágenes
-            product.image,
+            product.imagen,
+            product.imagen, // Duplicamos para simular más imágenes
+            product.imagen,
         ]
         : []
 
@@ -82,7 +82,7 @@ const CardDetails = (product) => {
             setIsAddingToCart(false)
 
             Swal.fire({
-                title: "Product added to cart",
+                title: "Producto añadido al carrito",
                 icon: "success",
                 draggable: true,
             })
@@ -103,10 +103,10 @@ const CardDetails = (product) => {
 
     // Calcular el nivel de stock
     const stockLevel =
-        product && product.rating
-            ? product.rating.count > 20
+        product && product.puntuacion
+            ? product.stock > 20
                 ? "high"
-                : product.rating.count > 10
+                : product.stock > 10
                     ? "medium"
                     : "low"
             : "unknown"
@@ -136,10 +136,10 @@ const CardDetails = (product) => {
                 </a>
                 <ChevronRight className="h-4 w-4 mx-2" />
                 <a href="/" className="hover:text-indigo-600 transition-colors">
-                    Products
+                    Productos
                 </a>
                 <ChevronRight className="h-4 w-4 mx-2" />
-                <span className="text-gray-900 font-medium">{product.title}</span>
+                <span className="text-gray-900 font-medium">{product.nombre}</span>
             </nav>
 
             <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
@@ -156,7 +156,7 @@ const CardDetails = (product) => {
                             >
                                 <img
                                     src={productImages[selectedImage] || "/placeholder.svg"}
-                                    alt={product.title}
+                                    alt={product.nombre}
                                     className="max-h-full max-w-full object-contain p-4"
                                 />
                             </motion.div>
@@ -174,7 +174,7 @@ const CardDetails = (product) => {
                                     >
                                         <img
                                             src={img || "/placeholder.svg"}
-                                            alt={`${product.title} - view ${index + 1}`}
+                                            alt={`${product.nombre} - view ${index + 1}`}
                                             className="w-full h-full object-contain"
                                         />
                                     </motion.button>
@@ -214,26 +214,26 @@ const CardDetails = (product) => {
                     >
                         {/* Categoría */}
                         <div className="inline-block px-3 py-1 bg-indigo-100 text-indigo-800 rounded-full text-sm font-medium">
-                            {product.category}
+                            {product.categoria}
                         </div>
 
                         {/* Título */}
-                        <h1 className="text-2xl md:text-3xl font-bold text-gray-900 leading-tight">{product.title}</h1>
+                        <h1 className="text-2xl md:text-3xl font-bold text-gray-900 leading-tight">{product.nombre}</h1>
 
                         {/* Rating */}
                         <div className="flex items-center gap-2 bg-amber-50 px-3 py-2 rounded-lg w-fit">
                             <div className="flex items-center">
                                 <img src={star || "/placeholder.svg"} alt="star" className="w-5 h-5 mr-1" />
-                                <p className="text-lg font-bold text-amber-500">{product.rating.rate}</p>
+                                <p className="text-lg font-bold text-amber-500">{product.puntuacion}</p>
                             </div>
-                            <span className="text-gray-500 text-sm">({product.rating.count} reviews)</span>
+                            <span className="text-gray-500 text-sm">({product.stock} reviews)</span>
                         </div>
 
                         {/* Precio */}
                         <div className="flex items-end gap-3">
-                            <p className="text-3xl font-bold text-indigo-600">${product.price}</p>
+                            <p className="text-3xl font-bold text-indigo-600">${product.precio}</p>
                             {product.price > 50 && (
-                                <p className="text-lg text-gray-500 line-through">${(product.price * 1.1).toFixed(2)}</p>
+                                <p className="text-lg text-gray-500 line-through">${(product.precio * 1.1).toFixed(2)}</p>
                             )}
                             {product.price > 50 && (
                                 <span className="px-2 py-1 bg-green-100 text-green-700 rounded-md text-sm font-medium">10% OFF</span>
@@ -242,8 +242,8 @@ const CardDetails = (product) => {
 
                         {/* Descripción */}
                         <div className="space-y-3 bg-gray-50 p-4 rounded-xl">
-                            <h2 className="text-lg font-bold text-gray-900">Description:</h2>
-                            <p className="text-gray-700 leading-relaxed">{product.description}</p>
+                            <h2 className="text-lg font-bold text-gray-900">Descripcion:</h2>
+                            <p className="text-gray-700 leading-relaxed">{product.descripcion}</p>
                         </div>
 
                         {/* Beneficios */}
@@ -253,8 +253,8 @@ const CardDetails = (product) => {
                                     <Truck className="h-5 w-5" />
                                 </div>
                                 <div>
-                                    <p className="font-semibold text-gray-900">Free Shipping</p>
-                                    <p className="text-sm text-gray-600">On orders over $50</p>
+                                    <p className="font-semibold text-gray-900">Envío Gratis</p>
+                                    <p className="text-sm text-gray-600">En pedidos superiores a $50</p>
                                 </div>
                             </div>
                             <div className="flex items-start gap-3">
@@ -262,8 +262,8 @@ const CardDetails = (product) => {
                                     <RotateCcw className="h-5 w-5" />
                                 </div>
                                 <div>
-                                    <p className="font-semibold text-gray-900">30-Day Returns</p>
-                                    <p className="text-sm text-gray-600">Hassle-free returns</p>
+                                    <p className="font-semibold text-gray-900">Devoluciones en 30 días</p>
+                                    <p className="text-sm text-gray-600">Devoluciones sin complicaciones</p>
                                 </div>
                             </div>
                             <div className="flex items-start gap-3">
@@ -271,8 +271,8 @@ const CardDetails = (product) => {
                                     <Shield className="h-5 w-5" />
                                 </div>
                                 <div>
-                                    <p className="font-semibold text-gray-900">Secure Payments</p>
-                                    <p className="text-sm text-gray-600">Your data is protected</p>
+                                    <p className="font-semibold text-gray-900">Pagos Seguros</p>
+                                    <p className="text-sm text-gray-600">Tus datos están protegidos</p>
                                 </div>
                             </div>
                         </div>
@@ -288,8 +288,8 @@ const CardDetails = (product) => {
                         {/* Disponibilidad de envío */}
                         <div className="bg-gradient-to-r from-indigo-50 to-blue-50 p-4 rounded-xl">
                             <p className="text-lg text-gray-800">
-                                <span className="font-bold text-indigo-600 block mb-1">Get it free tomorrow</span>
-                                for being your first purchase
+                                <span className="font-bold text-indigo-600 block mb-1">Recibilo gratis mañana</span>
+                                por ser tu primera compra
                             </p>
                         </div>
 
@@ -299,8 +299,8 @@ const CardDetails = (product) => {
                                 <RotateCcw className="h-5 w-5" />
                             </div>
                             <div>
-                                <p className="text-lg font-bold text-green-600">Free return</p>
-                                <p className="text-gray-600">You have 30 days from when you receive it.</p>
+                                <p className="text-lg font-bold text-green-600">Devolución gratuita</p>
+                                <p className="text-gray-600">Tenés 30 días desde que lo recibís.</p>
                             </div>
                         </div>
 
@@ -309,27 +309,27 @@ const CardDetails = (product) => {
                             <div className="flex justify-between items-center mb-2">
                                 <p className="text-lg text-gray-800 font-bold flex items-center">
                                     <Package className="h-5 w-5 mr-2 text-indigo-600" />
-                                    Stock available
+                                    Stock disponible
                                 </p>
                                 <div className={`px-3 py-1 rounded-full text-white text-sm font-medium ${stockColor[stockLevel]}`}>
-                                    {stockLevel === "high" ? "In Stock" : stockLevel === "medium" ? "Limited" : "Low Stock"}
+                                    {stockLevel === "high" ? "En stock" : stockLevel === "medium" ? "Limitado" : "Stock bajo"}
                                 </div>
                             </div>
                             <div className="flex items-center gap-2">
                                 <div className="w-full bg-gray-200 rounded-full h-2.5">
                                     <div
                                         className={`h-2.5 rounded-full ${stockColor[stockLevel]}`}
-                                        style={{ width: `${Math.min(100, (product.rating.count / 30) * 100)}%` }}
+                                        style={{ width: `${Math.min(100, (product.stock / 30) * 100)}%` }}
                                     ></div>
                                 </div>
-                                <span className="text-sm text-gray-600">{product.rating.count} units</span>
+                                <span className="text-sm text-gray-600">{product.stock} unidades</span>
                             </div>
                         </div>
 
                         {/* Cantidad */}
                         <div className="space-y-4">
                             <label htmlFor="quantity" className="text-lg font-bold text-gray-800 block">
-                                Quantity:
+                                Cantidad:
                             </label>
 
                             <div className="flex items-center">
@@ -382,12 +382,12 @@ const CardDetails = (product) => {
                                 {isAddingToCart ? (
                                     <>
                                         <Check className="h-5 w-5" />
-                                        Added to Cart
+                                        Agregado al carrito
                                     </>
                                 ) : (
                                     <>
                                         <ShoppingCart className="h-5 w-5" />
-                                        Add to Cart
+                                        Añadir al carrito
                                     </>
                                 )}
                             </motion.button>
@@ -395,7 +395,7 @@ const CardDetails = (product) => {
 
                         {/* Métodos de pago */}
                         <div className="space-y-3">
-                            <h2 className="text-lg text-gray-700 font-bold border-b border-gray-100 pb-2">Payment Methods:</h2>
+                            <h2 className="text-lg text-gray-700 font-bold border-b border-gray-100 pb-2">Metodos de pago:</h2>
                             <Payment />
                         </div>
                     </motion.div>

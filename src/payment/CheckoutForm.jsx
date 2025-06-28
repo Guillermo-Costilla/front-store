@@ -1,208 +1,234 @@
-import { useState } from "react"
-import { useStripe, useElements, CardElement } from "@stripe/react-stripe-js"
-import PropTypes from "prop-types"
-import Swal from "sweetalert2"
-import { motion } from "framer-motion"
-import { CreditCard, Mail, User, Globe, ShieldCheck, Lock, AlertCircle, ChevronRight } from "lucide-react"
-import { handlePaymentError, PaymentError, PaymentErrorTypes } from './errorHandler';
+"use client"
 
-const CheckoutForm = ({ processPayment, cartItems }) => {
+import { useState, useEffect } from "react"
+import { useStripe, useElements, PaymentElement, AddressElement } from "@stripe/react-stripe-js"
+import PropTypes from "prop-types"
+import { motion, AnimatePresence } from "framer-motion"
+import { CreditCard, Mail, Globe, ShieldCheck, Lock, AlertCircle, CheckCircle, ArrowLeft, Loader2 } from "lucide-react"
+
+const CheckoutForm = ({ processPayment, cartItems, isProcessing, paymentIntentId }) => {
     const stripe = useStripe()
     const elements = useElements()
     const [isLoading, setIsLoading] = useState(false)
-    const [cardError, setCardError] = useState("")
+    const [message, setMessage] = useState("")
+    const [isPaymentElementReady, setIsPaymentElementReady] = useState(false)
     const [formData, setFormData] = useState({
         email: "",
         name: "",
-        region: "",
+        saveInfo: false,
     })
-    const [activeStep, setActiveStep] = useState(1)
 
     // Calcular totales
-    const subtotal = cartItems.reduce((total, item) => total + item.price * item.quantity, 0)
+    const subtotal = cartItems.reduce((total, item) => total + item.precio * item.quantity, 0)
     const shipping = subtotal > 50 ? 0 : 10
-    const tax = subtotal * 0.05 // 5% de impuesto simulado
+    const tax = subtotal * 0.21 // 21% de impuesto
     const total = subtotal + shipping + tax
 
+    useEffect(() => {
+        if (!stripe) return
+
+        const clientSecret = new URLSearchParams(window.location.search).get("payment_intent_client_secret")
+
+        if (!clientSecret) return
+
+        stripe.retrievePaymentIntent(clientSecret).then(({ paymentIntent }) => {
+            switch (paymentIntent.status) {
+                case "succeeded":
+                    setMessage("¡Pago exitoso!")
+                    break
+                case "processing":
+                    setMessage("Tu pago se está procesando.")
+                    break
+                case "requires_payment_method":
+                    setMessage("Tu pago no se completó, intenta nuevamente.")
+                    break
+                default:
+                    setMessage("Algo salió mal.")
+                    break
+            }
+        })
+    }, [stripe])
+
     const handleInputChange = (e) => {
-        const { id, value } = e.target
+        const { name, value, type, checked } = e.target
         setFormData((prev) => ({
             ...prev,
-            [id]: value,
+            [name]: type === "checkbox" ? checked : value,
         }))
     }
 
-    // Manejar cambios en el elemento de tarjeta
-    const handleCardChange = (event) => {
-        setCardError(event.error ? event.error.message : "")
+    // Agregar esta función antes del handleSubmit:
+    const updatePaymentIntentWithCustomerData = async () => {
+        try {
+            // Aquí podrías hacer una llamada al backend para actualizar el Payment Intent
+            // con los datos reales del cliente si es necesario
+            console.log("Datos del cliente:", formData)
+        } catch (error) {
+            console.error("Error actualizando Payment Intent:", error)
+        }
     }
 
     const handleSubmit = async (event) => {
-        event.preventDefault();
+        event.preventDefault()
 
         if (!stripe || !elements) {
-            console.error("No se puede procesar el pago");
-            return;
+            return
         }
 
-        setIsLoading(true);
-        setActiveStep(2);
+        setIsLoading(true)
+        setMessage("")
 
         try {
-            const { error, paymentMethod } = await stripe.createPaymentMethod({
-                type: 'card',
-                card: elements.getElement(CardElement),
-                billing_details: {
-                    name: formData.name,
-                    email: formData.email,
-                }
-            });
+            // Actualizar Payment Intent con datos del cliente
+            await updatePaymentIntentWithCustomerData()
+
+            const { error, paymentIntent } = await stripe.confirmPayment({
+                elements,
+                confirmParams: {
+                    return_url: `${window.location.origin}/payment-success`,
+                    receipt_email: formData.email,
+                    payment_method_data: {
+                        billing_details: {
+                            name: formData.name,
+                            email: formData.email,
+                        },
+                    },
+                },
+                redirect: "if_required",
+            })
 
             if (error) {
-                throw new PaymentError(
-                    error.message,
-                    PaymentErrorTypes.CARD,
-                    { code: error.code }
-                );
+                if (error.type === "card_error" || error.type === "validation_error") {
+                    setMessage(error.message)
+                } else {
+                    setMessage("Ocurrió un error inesperado.")
+                }
+            } else if (paymentIntent && paymentIntent.status === "succeeded") {
+                await processPayment({ paymentIntent })
             }
-
-            setActiveStep(3);
-            await processPayment({
-                paymentMethodId: paymentMethod.id,
-                ...formData
-            });
-
-        } catch (error) {
-            console.error("Error en el pago:", error);
-            setActiveStep(2);
-
-            const errorInfo = handlePaymentError(error);
-
-            Swal.fire({
-                title: errorInfo.title,
-                text: errorInfo.message,
-                icon: "error",
-                confirmButtonText: "Entendido",
-            });
+        } catch (err) {
+            console.error("Error en el pago:", err)
+            setMessage("Error al procesar el pago. Intenta nuevamente.")
         } finally {
-            setIsLoading(false);
+            setIsLoading(false)
         }
-    };
+    }
 
-    // Animaciones
-    const fadeIn = {
-        hidden: { opacity: 0, y: 20 },
-        visible: { opacity: 1, y: 0, transition: { duration: 0.5 } },
+    const paymentElementOptions = {
+        layout: "tabs",
+        paymentMethodOrder: ["card", "apple_pay", "google_pay"],
+        fields: {
+            billingDetails: {
+                name: "auto",
+                email: "auto",
+                phone: "auto",
+                address: {
+                    country: "auto",
+                    line1: "auto",
+                    line2: "auto",
+                    city: "auto",
+                    state: "auto",
+                    postalCode: "auto",
+                },
+            },
+        },
+        terms: {
+            card: "auto",
+        },
     }
 
     return (
-        <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.6 }}
-            className="min-h-screen bg-gray-50 py-12 mt-20"
-        >
-            <div className="max-w-6xl mx-auto px-4">
-                {/* Pasos del checkout */}
-                <div className="mb-10">
-                    <div className="flex justify-center items-center mb-8">
-                        <div className="flex items-center">
-                            <div
-                                className={`flex items-center justify-center w-10 h-10 rounded-full ${activeStep >= 1 ? "bg-indigo-600 text-white" : "bg-gray-200 text-gray-600"}`}
-                            >
-                                1
-                            </div>
-                            <span className={`ml-2 font-medium ${activeStep >= 1 ? "text-indigo-600" : "text-gray-500"}`}>Cart</span>
+        <div className="min-h-screen bg-gray-50 py-8 mt-20">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                {/* Header */}
+                <div className="text-center mb-8">
+                    <motion.div
+                        initial={{ opacity: 0, y: -20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="flex items-center justify-center mb-4"
+                    >
+                        <div className="bg-indigo-100 p-3 rounded-full">
+                            <ShieldCheck className="w-8 h-8 text-indigo-600" />
                         </div>
-                        <div className={`w-16 h-1 mx-2 ${activeStep >= 2 ? "bg-indigo-600" : "bg-gray-200"}`}></div>
-                        <div className="flex items-center">
-                            <div
-                                className={`flex items-center justify-center w-10 h-10 rounded-full ${activeStep >= 2 ? "bg-indigo-600 text-white" : "bg-gray-200 text-gray-600"}`}
-                            >
-                                2
-                            </div>
-                            <span className={`ml-2 font-medium ${activeStep >= 2 ? "text-indigo-600" : "text-gray-500"}`}>
-                                Payment
-                            </span>
-                        </div>
-                        <div className={`w-16 h-1 mx-2 ${activeStep >= 3 ? "bg-indigo-600" : "bg-gray-200"}`}></div>
-                        <div className="flex items-center">
-                            <div
-                                className={`flex items-center justify-center w-10 h-10 rounded-full ${activeStep >= 3 ? "bg-indigo-600 text-white" : "bg-gray-200 text-gray-600"}`}
-                            >
-                                3
-                            </div>
-                            <span className={`ml-2 font-medium ${activeStep >= 3 ? "text-indigo-600" : "text-gray-500"}`}>
-                                Confirmation
-                            </span>
-                        </div>
-                    </div>
+                    </motion.div>
+                    <motion.h1
+                        initial={{ opacity: 0, y: -20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.1 }}
+                        className="text-3xl font-bold text-gray-900 mb-2"
+                    >
+                        Checkout Seguro
+                    </motion.h1>
+                    <motion.p
+                        initial={{ opacity: 0, y: -20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.2 }}
+                        className="text-gray-600"
+                    >
+                        Completa tu compra de forma segura con encriptación SSL
+                    </motion.p>
                 </div>
 
-                <motion.form
-                    onSubmit={handleSubmit}
-                    className="bg-white rounded-2xl shadow-xl overflow-hidden"
-                    variants={fadeIn}
-                    initial="hidden"
-                    animate="visible"
-                >
-                    <div className="grid grid-cols-1 lg:grid-cols-5">
-                        {/* Resumen de compra - Izquierda */}
-                        <div className="lg:col-span-2 bg-gradient-to-br from-indigo-50 to-blue-50 p-8">
-                            <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center">
-                                <ShoppingBagIcon className="w-6 h-6 mr-2 text-indigo-600" />
-                                Order Summary
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                    {/* Resumen del pedido */}
+                    <motion.div
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: 0.3 }}
+                        className="lg:col-span-5"
+                    >
+                        <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 sticky top-8">
+                            <h2 className="text-xl font-semibold text-gray-900 mb-6 flex items-center">
+                                <CreditCard className="w-5 h-5 mr-2 text-indigo-600" />
+                                Resumen del Pedido
                             </h2>
 
-                            <div className="space-y-6 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
-                                {cartItems.length > 0 ? (
-                                    cartItems.map((item) => (
-                                        <motion.div
-                                            key={item.id}
-                                            className="flex items-start space-x-4 bg-white p-4 rounded-xl shadow-sm"
-                                            whileHover={{ scale: 1.02 }}
-                                            transition={{ type: "spring", stiffness: 300 }}
-                                        >
-                                            <div className="w-20 h-20 bg-gray-100 rounded-lg overflow-hidden flex-shrink-0">
-                                                <img
-                                                    src={item.image || "/placeholder.svg"}
-                                                    alt={item.title}
-                                                    className="w-full h-full object-contain p-2"
-                                                />
+                            {/* Lista de productos */}
+                            <div className="space-y-4 mb-6 max-h-80 overflow-y-auto">
+                                {cartItems.map((item, index) => (
+                                    <motion.div
+                                        key={item.id}
+                                        initial={{ opacity: 0, y: 10 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        transition={{ delay: 0.1 * index }}
+                                        className="flex items-center space-x-4 p-3 bg-gray-50 rounded-xl"
+                                    >
+                                        <div className="w-16 h-16 bg-white rounded-lg overflow-hidden flex-shrink-0 border">
+                                            <img
+                                                src={item.imagen || "/placeholder.svg?height=64&width=64"}
+                                                alt={item.nombre}
+                                                className="w-full h-full object-cover"
+                                            />
+                                        </div>
+                                        <div className="flex-1 min-w-0">
+                                            <h3 className="text-sm font-medium text-gray-900 truncate">{item.nombre}</h3>
+                                            <div className="flex items-center justify-between mt-1">
+                                                <span className="text-sm text-gray-500">Cantidad: {item.quantity}</span>
+                                                <span className="text-sm font-semibold text-gray-900">
+                                                    ${(item.precio * item.quantity).toFixed(2)}
+                                                </span>
                                             </div>
-                                            <div className="flex-1 min-w-0">
-                                                <h3 className="text-sm font-medium text-gray-900 line-clamp-2">{item.title}</h3>
-                                                <div className="flex justify-between items-end mt-2">
-                                                    <div className="text-sm text-gray-500">Qty: {item.quantity}</div>
-                                                    <div className="text-sm font-semibold text-indigo-600">
-                                                        ${(item.price * item.quantity).toFixed(2)}
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </motion.div>
-                                    ))
-                                ) : (
-                                    <div className="text-center py-8">
-                                        <p className="text-gray-500 italic">Your cart is empty.</p>
-                                    </div>
-                                )}
+                                        </div>
+                                    </motion.div>
+                                ))}
                             </div>
 
-                            <div className="mt-8 space-y-3 border-t border-gray-200 pt-6">
+                            {/* Totales */}
+                            <div className="border-t border-gray-200 pt-4 space-y-3">
                                 <div className="flex justify-between text-sm">
                                     <span className="text-gray-600">Subtotal</span>
                                     <span className="font-medium">${subtotal.toFixed(2)}</span>
                                 </div>
                                 <div className="flex justify-between text-sm">
-                                    <span className="text-gray-600">Shipping</span>
+                                    <span className="text-gray-600">Envío</span>
                                     {shipping === 0 ? (
-                                        <span className="text-green-600 font-medium">Free</span>
+                                        <span className="text-green-600 font-medium">Gratis</span>
                                     ) : (
                                         <span className="font-medium">${shipping.toFixed(2)}</span>
                                     )}
                                 </div>
                                 <div className="flex justify-between text-sm">
-                                    <span className="text-gray-600">Tax</span>
+                                    <span className="text-gray-600">IVA (21%)</span>
                                     <span className="font-medium">${tax.toFixed(2)}</span>
                                 </div>
                                 <div className="flex justify-between text-lg font-bold pt-3 border-t border-gray-200">
@@ -211,200 +237,238 @@ const CheckoutForm = ({ processPayment, cartItems }) => {
                                 </div>
                             </div>
 
-                            <div className="mt-8 bg-white p-4 rounded-xl border border-indigo-100">
+                            {/* Garantías de seguridad */}
+                            <div className="mt-6 space-y-3">
                                 <div className="flex items-center text-sm text-gray-600">
-                                    <ShieldCheck className="h-5 w-5 text-green-500 mr-2" />
-                                    <span>All transactions are secure and encrypted</span>
+                                    <ShieldCheck className="w-4 h-4 text-green-500 mr-2 flex-shrink-0" />
+                                    <span>Transacción 100% segura</span>
+                                </div>
+                                <div className="flex items-center text-sm text-gray-600">
+                                    <Lock className="w-4 h-4 text-green-500 mr-2 flex-shrink-0" />
+                                    <span>Datos encriptados con SSL</span>
+                                </div>
+                                <div className="flex items-center text-sm text-gray-600">
+                                    <CheckCircle className="w-4 h-4 text-green-500 mr-2 flex-shrink-0" />
+                                    <span>Garantía de devolución</span>
                                 </div>
                             </div>
                         </div>
+                    </motion.div>
 
-                        {/* Formulario de pago - Derecha */}
-                        <div className="lg:col-span-3 p-8">
-                            <h2 className="text-2xl font-bold text-gray-900 mb-8 flex items-center">
-                                <CreditCard className="w-6 h-6 mr-2 text-indigo-600" />
-                                Payment Details
-                            </h2>
+                    {/* Formulario de pago */}
+                    <motion.div
+                        initial={{ opacity: 0, x: 20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: 0.4 }}
+                        className="lg:col-span-7"
+                    >
+                        <form onSubmit={handleSubmit} className="space-y-6">
+                            {/* Información de contacto */}
+                            <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
+                                <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                                    <Mail className="w-5 h-5 mr-2 text-indigo-600" />
+                                    Información de Contacto
+                                </h3>
 
-                            {/* Email */}
-                            <div className="mb-6">
-                                <label htmlFor="email" className="block text-gray-700 font-medium mb-2 flex items-center">
-                                    <Mail className="w-5 h-5 mr-2 text-indigo-500" />
-                                    Email Address
-                                </label>
-                                <div className="relative">
-                                    <input
-                                        type="email"
-                                        id="email"
-                                        value={formData.email}
-                                        onChange={handleInputChange}
-                                        className="w-full px-4 py-3 pl-12 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
-                                        placeholder="your.email@example.com"
-                                        required
-                                    />
-                                    <Mail className="w-5 h-5 text-gray-400 absolute left-4 top-1/2 transform -translate-y-1/2" />
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div>
+                                        <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
+                                            Email *
+                                        </label>
+                                        <input
+                                            type="email"
+                                            id="email"
+                                            name="email"
+                                            value={formData.email}
+                                            onChange={handleInputChange}
+                                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors"
+                                            placeholder="tu@email.com"
+                                            required
+                                        />
+                                    </div>
+                                    <div>
+                                        <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
+                                            Nombre Completo *
+                                        </label>
+                                        <input
+                                            type="text"
+                                            id="name"
+                                            name="name"
+                                            value={formData.name}
+                                            onChange={handleInputChange}
+                                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors"
+                                            placeholder="Juan Pérez"
+                                            required
+                                        />
+                                    </div>
+                                </div>
+
+                                <div className="mt-4">
+                                    <label className="flex items-center">
+                                        <input
+                                            type="checkbox"
+                                            name="saveInfo"
+                                            checked={formData.saveInfo}
+                                            onChange={handleInputChange}
+                                            className="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
+                                        />
+                                        <span className="ml-2 text-sm text-gray-600">Guardar información para futuras compras</span>
+                                    </label>
                                 </div>
                             </div>
 
-                            {/* Cardholder Name */}
-                            <div className="mb-6">
-                                <label htmlFor="name" className="block text-gray-700 font-medium mb-2 flex items-center">
-                                    <User className="w-5 h-5 mr-2 text-indigo-500" />
-                                    Cardholder Name
-                                </label>
-                                <div className="relative">
-                                    <input
-                                        type="text"
-                                        id="name"
-                                        value={formData.name}
-                                        onChange={handleInputChange}
-                                        className="w-full px-4 py-3 pl-12 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
-                                        placeholder="John Doe"
-                                        required
-                                    />
-                                    <User className="w-5 h-5 text-gray-400 absolute left-4 top-1/2 transform -translate-y-1/2" />
-                                </div>
-                            </div>
+                            {/* Información de pago */}
+                            <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
+                                <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                                    <CreditCard className="w-5 h-5 mr-2 text-indigo-600" />
+                                    Información de Pago
+                                </h3>
 
-                            {/* Country */}
-                            <div className="mb-8">
-                                <label htmlFor="region" className="block text-gray-700 font-medium mb-2 flex items-center">
-                                    <Globe className="w-5 h-5 mr-2 text-indigo-500" />
-                                    Country or Region
-                                </label>
-                                <div className="relative">
-                                    <input
-                                        type="text"
-                                        id="region"
-                                        value={formData.region}
-                                        onChange={handleInputChange}
-                                        className="w-full px-4 py-3 pl-12 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
-                                        placeholder="United States"
-                                        required
-                                    />
-                                    <Globe className="w-5 h-5 text-gray-400 absolute left-4 top-1/2 transform -translate-y-1/2" />
-                                </div>
-                            </div>
-
-                            {/* Stripe Card Element */}
-                            <div className="mb-6">
-                                <label htmlFor="card" className="block text-gray-700 font-medium mb-2 flex items-center">
-                                    <CreditCard className="w-5 h-5 mr-2 text-indigo-500" />
-                                    Card Information
-                                </label>
-                                <div className="bg-white border border-gray-300 rounded-lg p-4 transition-all hover:shadow-md focus-within:ring-2 focus-within:ring-indigo-500 focus-within:border-indigo-500">
-                                    <CardElement
-                                        id="card"
-                                        onChange={handleCardChange}
-                                        options={{
-                                            style: {
-                                                base: {
-                                                    color: "#424770",
-                                                    fontFamily: "Arial, sans-serif",
-                                                    fontSize: "16px",
-                                                    fontSmoothing: "antialiased",
-                                                    "::placeholder": { color: "#aab7c4" },
-                                                    iconColor: "#666EE8",
-                                                },
-                                                invalid: {
-                                                    color: "#e5424d",
-                                                    iconColor: "#e5424d",
-                                                },
-                                            },
-                                            hidePostalCode: true,
-                                        }}
+                                {/* Payment Element de Stripe */}
+                                <div className="mb-6">
+                                    <PaymentElement
+                                        id="payment-element"
+                                        options={paymentElementOptions}
+                                        onReady={() => setIsPaymentElementReady(true)}
                                     />
                                 </div>
 
-                                {/* Mensaje de error de tarjeta */}
-                                {cardError && (
-                                    <motion.div
-                                        initial={{ opacity: 0, y: -10 }}
-                                        animate={{ opacity: 1, y: 0 }}
-                                        className="mt-2 flex items-start text-red-600 text-sm"
-                                    >
-                                        <AlertCircle className="w-4 h-4 mr-1 flex-shrink-0 mt-0.5" />
-                                        <span>{cardError}</span>
-                                    </motion.div>
-                                )}
-
-                                <div className="mt-3 flex items-center text-xs text-gray-500">
-                                    <Lock className="w-4 h-4 mr-1 text-gray-400" />
-                                    <span>Your payment information is encrypted and secure</span>
-                                </div>
-                            </div>
-
-                            {/* Botón de pago con loader */}
-                            <motion.button
-                                type="submit"
-                                disabled={!stripe || isLoading || !!cardError}
-                                className={`w-full py-4 flex justify-center items-center bg-indigo-600 text-white text-lg font-semibold rounded-lg shadow-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-all duration-300 ${isLoading || !!cardError || !stripe ? "opacity-70 cursor-not-allowed" : "hover:bg-indigo-700"
-                                    }`}
-                                whileHover={!isLoading && !cardError && stripe ? { scale: 1.02 } : {}}
-                                whileTap={!isLoading && !cardError && stripe ? { scale: 0.98 } : {}}
-                            >
-                                {isLoading ? (
-                                    <div className="flex items-center">
-                                        <svg
-                                            className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
-                                            xmlns="http://www.w3.org/2000/svg"
-                                            fill="none"
-                                            viewBox="0 0 24 24"
+                                {/* Mensaje de error */}
+                                <AnimatePresence>
+                                    {message && (
+                                        <motion.div
+                                            initial={{ opacity: 0, y: -10 }}
+                                            animate={{ opacity: 1, y: 0 }}
+                                            exit={{ opacity: 0, y: -10 }}
+                                            className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg flex items-start"
                                         >
-                                            <circle
-                                                className="opacity-25"
-                                                cx="12"
-                                                cy="12"
-                                                r="10"
-                                                stroke="currentColor"
-                                                strokeWidth="4"
-                                            ></circle>
-                                            <path
-                                                className="opacity-75"
-                                                fill="currentColor"
-                                                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                                            ></path>
-                                        </svg>
-                                        Processing...
-                                    </div>
-                                ) : (
-                                    <div className="flex items-center">
-                                        <Lock className="mr-2 h-5 w-5" />
-                                        Pay ${total.toFixed(2)} Securely
-                                        <ChevronRight className="ml-2 h-5 w-5" />
-                                    </div>
-                                )}
-                            </motion.button>
+                                            <AlertCircle className="w-5 h-5 text-red-500 mr-2 flex-shrink-0 mt-0.5" />
+                                            <span className="text-red-700 text-sm">{message}</span>
+                                        </motion.div>
+                                    )}
+                                </AnimatePresence>
+                            </div>
 
-                            <p className="mt-4 text-center text-xs text-gray-500">
-                                By clicking "Pay Securely", you agree to our{" "}
-                                <a href="#" className="text-indigo-600 hover:underline">
-                                    Terms of Service
-                                </a>{" "}
-                                and{" "}
-                                <a href="#" className="text-indigo-600 hover:underline">
-                                    Privacy Policy
-                                </a>
-                            </p>
-                        </div>
-                    </div>
-                </motion.form>
+                            {/* Dirección de facturación */}
+                            <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
+                                <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                                    <Globe className="w-5 h-5 mr-2 text-indigo-600" />
+                                    Dirección de Facturación
+                                </h3>
+
+                                <AddressElement
+                                    options={{
+                                        mode: "billing",
+                                        allowedCountries: ["US", "AR", "MX", "ES", "CO", "CL", "PE"],
+                                        blockPoBox: true,
+                                        fields: {
+                                            phone: "always",
+                                        },
+                                        validation: {
+                                            phone: {
+                                                required: "always",
+                                            },
+                                        },
+                                    }}
+                                />
+                            </div>
+
+                            {/* Botón de pago */}
+                            <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
+                                <motion.button
+                                    type="submit"
+                                    disabled={isLoading || !stripe || !elements || isProcessing}
+                                    className={`w-full py-4 px-6 rounded-xl font-semibold text-lg transition-all duration-200 flex items-center justify-center ${isLoading || !stripe || !elements || isProcessing
+                                            ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                                            : "bg-indigo-600 hover:bg-indigo-700 text-white shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+                                        }`}
+                                    whileHover={!isLoading && stripe && elements && !isProcessing ? { scale: 1.02 } : {}}
+                                    whileTap={!isLoading && stripe && elements && !isProcessing ? { scale: 0.98 } : {}}
+                                >
+                                    {isLoading || isProcessing ? (
+                                        <>
+                                            <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                                            {isProcessing ? "Procesando..." : "Preparando pago..."}
+                                        </>
+                                    ) : (
+                                        <>
+                                            <Lock className="w-5 h-5 mr-2" />
+                                            Pagar ${total.toFixed(2)} de forma segura
+                                        </>
+                                    )}
+                                </motion.button>
+
+                                {/* Información legal */}
+                                <div className="mt-4 text-center">
+                                    <p className="text-xs text-gray-500">
+                                        Al completar tu pedido, aceptas nuestros{" "}
+                                        <a href="#" className="text-indigo-600 hover:underline">
+                                            Términos de Servicio
+                                        </a>{" "}
+                                        y{" "}
+                                        <a href="#" className="text-indigo-600 hover:underline">
+                                            Política de Privacidad
+                                        </a>
+                                    </p>
+                                </div>
+
+                                {/* Métodos de pago aceptados */}
+                                <div className="mt-6 pt-4 border-t border-gray-200">
+                                    <p className="text-sm text-gray-600 text-center mb-3">Métodos de pago aceptados</p>
+                                    <div className="flex justify-center items-center space-x-4">
+                                        <div className="flex items-center space-x-2">
+                                            <div className="w-8 h-5 bg-blue-600 rounded text-white text-xs flex items-center justify-center font-bold">
+                                                VISA
+                                            </div>
+                                            <div className="w-8 h-5 bg-red-600 rounded text-white text-xs flex items-center justify-center font-bold">
+                                                MC
+                                            </div>
+                                            <div className="w-8 h-5 bg-blue-500 rounded text-white text-xs flex items-center justify-center font-bold">
+                                                AMEX
+                                            </div>
+                                        </div>
+                                        <div className="text-gray-400">|</div>
+                                        <div className="flex items-center space-x-2">
+                                            <div className="w-8 h-5 bg-gray-800 rounded text-white text-xs flex items-center justify-center font-bold">
+                                                PAY
+                                            </div>
+                                            <div className="w-8 h-5 bg-green-600 rounded text-white text-xs flex items-center justify-center font-bold">
+                                                GPay
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Botón de volver */}
+                            <div className="text-center">
+                                <button
+                                    type="button"
+                                    onClick={() => window.history.back()}
+                                    className="inline-flex items-center text-indigo-600 hover:text-indigo-700 font-medium transition-colors"
+                                >
+                                    <ArrowLeft className="w-4 h-4 mr-1" />
+                                    Volver al carrito
+                                </button>
+                            </div>
+                        </form>
+                    </motion.div>
+                </div>
             </div>
-        </motion.div>
+        </div>
     )
 }
-
-// Componente de icono de bolsa de compras
-const ShoppingBagIcon = ({ className }) => (
-    <svg xmlns="http://www.w3.org/2000/svg" className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
-    </svg>
-)
 
 CheckoutForm.propTypes = {
     processPayment: PropTypes.func.isRequired,
     cartItems: PropTypes.array.isRequired,
+    isProcessing: PropTypes.bool,
+    paymentIntentId: PropTypes.string,
+}
+
+CheckoutForm.defaultProps = {
+    isProcessing: false,
+    paymentIntentId: "",
 }
 
 export default CheckoutForm
-

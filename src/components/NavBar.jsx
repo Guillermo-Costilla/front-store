@@ -10,9 +10,9 @@ import useAuthStore from "../store/useAuthStore"
 
 const navigation = [
   { name: "Home", href: "/" },
-  { name: "Orders", href: "/orders" },
-  { name: "Offers", href: "/offers" },
-  { name: "About", href: "/about" },
+  { name: "Ordenes", href: "/orders" },
+  { name: "Ofertas", href: "/offers" },
+  { name: "Nosotros", href: "/about" },
 ]
 
 function classNames(...classes) {
@@ -157,7 +157,7 @@ export default function NavBar() {
                                   "block px-4 py-2 text-sm text-gray-700 hover:text-indigo-600 transition-colors duration-150",
                                 )}
                               >
-                                My Profile
+                                Mi Perfil
                               </Link>
                             )}
                           </Menu.Item>
@@ -170,7 +170,7 @@ export default function NavBar() {
                                   "w-full text-left px-4 py-2 text-sm text-gray-700 hover:text-indigo-600 transition-colors duration-150",
                                 )}
                               >
-                                Log out
+                                Cerrar Sesión
                               </button>
                             )}
                           </Menu.Item>
@@ -186,7 +186,7 @@ export default function NavBar() {
                                   "block px-4 py-2 text-sm text-gray-700 hover:text-indigo-600 transition-colors duration-150",
                                 )}
                               >
-                                Sign In
+                                Iniciar Sesión
                               </Link>
                             )}
                           </Menu.Item>
@@ -199,7 +199,7 @@ export default function NavBar() {
                                   "block px-4 py-2 text-sm text-gray-700 hover:text-indigo-600 transition-colors duration-150",
                                 )}
                               >
-                                Register
+                                Registrarme
                               </Link>
                             )}
                           </Menu.Item>

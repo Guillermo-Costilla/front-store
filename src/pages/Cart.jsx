@@ -11,7 +11,7 @@ const Cart = () => {
     };
 
     const calculateTotal = () => {
-        return cartItems.reduce((total, item) => total + item.price * item.quantity, 0);
+        return cartItems.reduce((total, item) => total + item.precio * item.quantity, 0);
     };
 
     return (
@@ -22,7 +22,7 @@ const Cart = () => {
             className="min-h-screen bg-gray-50 py-12 mt-20"
         >
             <div className='container min-h-screen mx-auto px-4 py-8'>
-                <h2 className='text-2xl font-bold mb-6'>Shopping Cart</h2>
+                <h2 className='text-2xl font-bold mb-6'>Carrito de compras</h2>
                 <div className='space-y-4'>
                     {cartItems && cartItems.length > 0 ? (
                         <form action="" method="POST">
@@ -32,22 +32,22 @@ const Cart = () => {
                                         {/* Imagen */}
                                         <div className='w-full md:w-1/6 mb-4 md:mb-0'>
                                             <img
-                                                src={item.image}
+                                                src={item.imagen}
                                                 className='w-32 h-32 object-contain mx-auto'
-                                                alt={item.title}
+                                                alt={item.nombre}
                                             />
                                         </div>
 
                                         {/* Información del producto */}
                                         <div className='flex-1 text-center md:text-left'>
                                             <h3 className='text-lg md:text-xl font-semibold mb-2 line-clamp-2'>
-                                                {item.title}
+                                                {item.nombre}
                                             </h3>
                                             <p className='text-gray-600 mb-2'>
-                                                Quantity: {item.quantity}
+                                                Cantidad: {item.quantity}
                                             </p>
                                             <p className='text-lg font-bold text-green-500'>
-                                                Total: ${(item.price * item.quantity).toFixed(2)}
+                                                Total: ${(item.precio * item.quantity).toFixed(2)}
                                             </p>
                                         </div>
 
@@ -72,21 +72,21 @@ const Cart = () => {
                             <div className='mt-6 p-4 bg-gray-50 rounded-lg'>
                                 <div className='flex flex-col md:flex-row md:justify-between md:items-center'>
                                     <p className="text-xl font-bold mb-4 md:mb-0">
-                                        Total Cart: <span className='text-green-500'>
+                                        Total Carrito: <span className='text-green-500'>
                                             ${calculateTotal().toFixed(2)}
                                         </span>
                                     </p>
                                     <Link to="/payment"
                                         className="w-full md:w-auto bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600 transition-colors"
                                     >
-                                        Proceed to Payment
+                                        Continuar Pago
                                     </Link>
                                 </div>
                             </div>
                         </form>
                     ) : (
                         <div className='text-center py-12 bg-gray-50 rounded-lg'>
-                            <p className='text-gray-600 text-xl'>The cart is empty...</p>
+                            <p className='text-gray-600 text-xl'>🛒 El carrito está vacío….</p>
                         </div>
                     )}
                 </div>

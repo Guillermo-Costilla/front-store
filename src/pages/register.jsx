@@ -12,8 +12,7 @@ const Register = () => {
     const [formData, setFormData] = useState({
         nombre: "",
         email: "",
-        password: "",
-        imagen: "",
+        password: ""
     });
 
     const handleSignup = async (e) => {
@@ -42,7 +41,6 @@ const Register = () => {
                 nombre: "",
                 email: "",
                 password: "",
-                imagen: "",
             });
 
             // Redirigir al usuario después de unos segundos
@@ -73,10 +71,16 @@ const Register = () => {
 
                 {error && <p className="text-red-600 mt-4">{error}</p>}
 
-                {["nombre", "email", "password", "imagen"].map((field, index) => (
+                {["nombre", "email", "password"].map((field, index) => (
                     <motion.input
                         key={index}
-                        type={field === "password" ? "password" : field === "email" ? "email" : field === "imagen" ? "url" : "text"}
+                        type={
+                            field === "password"
+                                ? "password"
+                                : field === "email"
+                                    ? "email"
+                                    : "text"
+                        }
                         name={field}
                         placeholder={field.charAt(0).toUpperCase() + field.slice(1)}
                         value={formData[field]}

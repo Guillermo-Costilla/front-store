@@ -64,7 +64,10 @@ const Login = () => {
             src="https://e7.pngegg.com/pngimages/549/560/png-clipart-computer-icons-login-scalable-graphics-email-accountability-blue-logo-thumbnail.png"
             className="mx-auto h-12 w-auto"
           />
-          <h2 className="mt-6 text-2xl font-bold text-gray-900">Sign in</h2>
+          <h2 className="mt-6 text-2xl font-bold text-gray-900">Ingresa para realizar compras</h2>
+          <h3>Modo prueba:</h3>
+          <h3>Email: admin@tienda.com</h3>
+          <h3>Contraseña: password </h3>
         </div>
 
         <form onSubmit={handleLogin} className="mt-8">
@@ -90,16 +93,16 @@ const Login = () => {
             whileTap={{ scale: 0.9 }}
             disabled={loading}
           >
-            {loading ? <ClipLoader size={20} color="white" /> : "Login"}
+            {loading ? <ClipLoader size={20} color="white" /> : "Ingresa"}
           </motion.button>
         </form>
 
         <div className="mt-6 text-center flex flex-1 gap-4 justify-center items-center">
           <p className="mt-6 text-center text-sm text-gray-500">
-            ¿Don't have an account?{" "}
-            <Link to="/register" className="text-indigo-600 font-semibold">Register</Link>
+            ¿No tienes una cuenta?{" "}
+            <Link to="/register" className="text-indigo-600 font-semibold">Registrate</Link>
           </p>
-          <Button text="Go Home" route="/" />
+          <Button text="Volver al Home" route="/" />
         </div>
       </motion.div>
     </div>

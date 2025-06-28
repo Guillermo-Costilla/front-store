@@ -7,8 +7,9 @@ export const useStoreApi = create((set) => ({
 
     getProducts: async () => {
         try {
-            const response = await axios.get("https://fakestoreapi.com/products");
+            const response = await axios.get("https://store-backend-pied.vercel.app/api/products");
             set({ products: response.data });
+            console.log("Products fetched successfully:", response.data);
         } catch (error) {
             console.error("Error fetching products:", error);
         }
@@ -16,7 +17,7 @@ export const useStoreApi = create((set) => ({
 
     getProductById: async (id) => {
         try {
-            const response = await axios.get(`https://fakestoreapi.com/products/${id}`);
+            const response = await axios.get(`https://store-backend-pied.vercel.app/api/products/${id}`);
             set({ currentProduct: response.data });
         } catch (error) {
             console.error("Error fetching product:", error);

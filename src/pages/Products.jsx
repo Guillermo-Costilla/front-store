@@ -10,10 +10,10 @@ const Products = () => {
 
     useEffect(() => {
         getProducts();
-    }, [getProducts]);
+    }, []);
 
     const filteredProducts = products.filter(product =>
-        product.title.toLowerCase().includes(searchTerm.toLowerCase())
+        product.nombre.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
     return (
@@ -24,7 +24,7 @@ const Products = () => {
             <div className="w-[90%] sm:w-full max-w-lg mx-auto mt-6">
                 <input
                     type="text"
-                    placeholder="Search products..."
+                    placeholder="Buscar productos..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                     className="w-full px-4 py-2 rounded-lg border border-gray-300 shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
@@ -41,7 +41,7 @@ const Products = () => {
                         ))
                     ) : (
                         <div className="text-center text-gray-600 col-span-full mt-10">
-                            No products found matching "{searchTerm}"
+                            No se encontraron productos para: "{searchTerm}"
                         </div>
                     )
                 ) : (

@@ -2,7 +2,7 @@ import axios from 'axios';
 
 // Crear instancia de axios con configuración base
 export const axiosInstance = axios.create({
-  baseURL: 'https://store-backend-7ws5.onrender.com/api',
+  baseURL: 'https://store-backend-pied.vercel.app/api',
   headers: {
     'Content-Type': 'application/json',
     'Accept': 'application/json'
@@ -10,8 +10,13 @@ export const axiosInstance = axios.create({
 });
 
 export const fakeStoreApi = axios.create({
-  baseURL: 'https://fakestoreapi.com',
+  baseURL: 'http://localhost:5000/api',
+  headers: {
+    'Content-Type': 'application/json',
+    'Accept': 'application/json'
+  }
 });
+
 
 // Interceptor para agregar el token a las peticiones autenticadas
 axiosInstance.interceptors.request.use(
