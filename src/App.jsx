@@ -1,15 +1,88 @@
-import { RouterProvider } from "react-router-dom";
-import router from "./router/router";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom"
+import Layout from "./components/Layout/Layout"
+import Home from "./pages/Home"
+import Products from "./pages/Products"
+import ProductDetail from "./pages/ProductDetail"
+import FlashSales from "./pages/FlashSales"
+import Login from "./pages/Login"
+import Register from "./pages/Register"
+import Cart from "./pages/Cart"
+import Checkout from "./pages/Checkout"
+import Favorites from "./pages/Favorites"
+import Orders from "./pages/Orders"
+import Dashboard from "./pages/Dashboard"
+import ProtectedRoute from "./components/ProtectedRoute"
+import AdminLayout from "./pages/admin/AdminLayout"
+import AdminDashboard from "./pages/admin/AdminDashboard"
+import ProductManagement from "./pages/admin/ProductManagement"
+import OrderManagement from "./pages/admin/OrderManagement"
+import { useEffect } from "react"
+import { useCartStore } from "./store/cartStore"
+import { useAuthStore } from "./store/authStore"
 
 function App() {
-
-
+  const { user } = useAuthStore()
+  useEffect(() => {
+    useCartStore.getState().initCart()
+  }, [])
+  useEffect(() => {
+    useCartStore.getState().handleUserChange()
+  }, [user])
 
   return (
+    <Router>
+      <Routes>
+        <Route path="/" element={<Layout />}>
+          <Route index element={<Home />} />
+          <Route path="productos" element={<Products />} />
+          <Route path="producto/:id" element={<ProductDetail />} />
+          <Route path="ofertas" element={<FlashSales />} />
+          <Route path="login" element={<Login />} />
+          <Route path="register" element={<Register />} />
+          <Route path="carrito" element={<Cart />} />
+          <Route path="checkout" element={<Checkout />} />
+          <Route
+            path="favoritos"
+            element={
+              <ProtectedRoute>
+                <Favorites />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="ordenes"
+            element={
+              <ProtectedRoute>
+                <Orders />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="dashboard"
+            element={
+              <ProtectedRoute>
+                <Dashboard />
+              </ProtectedRoute>
+            }
+          />
+        </Route>
 
-    <RouterProvider router={router} />
-
-  );
+        {/* Rutas de administrador */}
+        <Route
+          path="/admin"
+          element={
+            <ProtectedRoute adminOnly={true}>
+              <AdminLayout />
+            </ProtectedRoute>
+          }
+        >
+          <Route index element={<AdminDashboard />} />
+          <Route path="productos" element={<ProductManagement />} />
+          <Route path="ordenes" element={<OrderManagement />} />
+        </Route>
+      </Routes>
+    </Router>
+  )
 }
 
 export default App
