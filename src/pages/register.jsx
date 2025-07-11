@@ -1,5 +1,3 @@
-"use client"
-
 import { useState } from "react"
 import { Link, useNavigate } from "react-router-dom"
 import { Eye, EyeOff, Mail, Lock, User, MapPin, Globe } from "lucide-react"
@@ -269,8 +267,8 @@ export default function Register() {
             type="submit"
             disabled={isLoading}
             className={`w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white transition-colors ${isLoading
-                ? "bg-gray-400 cursor-not-allowed"
-                : "bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
+              ? "bg-gray-400 cursor-not-allowed"
+              : "bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
               }`}
           >
             {isLoading ? (

@@ -1,6 +1,6 @@
 import { create } from "zustand"
 import Cookies from "js-cookie"
-import toast from "react-hot-toast"
+import Swal from 'sweetalert2'
 import { useAuthStore } from "./authStore"
 
 function getCartCookieName(user) {
@@ -47,7 +47,7 @@ export const useCartStore = create((set, get) => ({
     }
     set({ items: newItems })
     saveCartToCookie(user, newItems)
-    toast.success(`${product.name} agregado al carrito`)
+    Swal.fire(`${product.name} agregado al carrito`, '', 'success')
   },
 
   removeItem: (productId) => {
@@ -58,7 +58,7 @@ export const useCartStore = create((set, get) => ({
     set({ items: newItems })
     saveCartToCookie(user, newItems)
     if (item) {
-      toast.success(`${item.name} eliminado del carrito`)
+      Swal.fire(`${item.name} eliminado del carrito`, '', 'success')
     }
   },
 
@@ -80,7 +80,7 @@ export const useCartStore = create((set, get) => ({
     const user = useAuthStore.getState().user
     set({ items: [] })
     saveCartToCookie(user, [])
-    toast.success("Carrito vaciado")
+    Swal.fire('Carrito vaciado', '', 'success')
   },
 
   getTotal: () => {

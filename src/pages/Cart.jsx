@@ -3,7 +3,7 @@ import { Link, useNavigate } from "react-router-dom"
 import { Trash2, Plus, Minus, ShoppingBag, ArrowRight } from 'lucide-react'
 import { useCartStore } from "../store/cartStore"
 import { useAuthStore } from "../store/authStore"
-import toast from "react-hot-toast"
+import Swal from 'sweetalert2'
 
 export default function Cart() {
   const { items, removeItem, updateQuantity, getTotal, getTotalWithTax } = useCartStore()
@@ -21,7 +21,7 @@ export default function Cart() {
 
   const handleCheckout = () => {
     if (!isAuthenticated) {
-      toast.error("Debes iniciar sesión para continuar con la compra")
+      Swal.fire('Debes iniciar sesión para continuar con la compra', '', 'error')
       navigate("/login")
       return
     }

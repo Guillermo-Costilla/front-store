@@ -1,11 +1,9 @@
-"use client"
-
 import { useState, useEffect } from "react"
 import { Link } from "react-router-dom"
 import { Package, Clock, XCircle, Eye, Truck } from "lucide-react"
 import { ordersAPI } from "../lib/api"
 import { useAuthStore } from "../store/authStore"
-import toast from "react-hot-toast"
+import Swal from 'sweetalert2'
 
 export default function Orders() {
   const [orders, setOrders] = useState([])
@@ -25,7 +23,7 @@ export default function Orders() {
       const response = await ordersAPI.getUserOrders()
       setOrders(response.data)
     } catch (error) {
-      toast.error("Error al cargar las órdenes")
+      Swal.fire('Error al cargar las órdenes', '', 'error')
     } finally {
       setIsLoading(false)
     }
@@ -244,8 +242,8 @@ export default function Orders() {
                         <span className="text-gray-600 dark:text-gray-400">Estado de pago:</span>
                         <span
                           className={`font-medium ${order.pago === "pagado"
-                              ? "text-green-600 dark:text-green-400"
-                              : "text-yellow-600 dark:text-yellow-400"
+                            ? "text-green-600 dark:text-green-400"
+                            : "text-yellow-600 dark:text-yellow-400"
                             }`}
                         >
                           {order.pago === "pagado" ? "Pagado" : "Pendiente"}

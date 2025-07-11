@@ -1,10 +1,8 @@
-"use client"
-
 import { useState, useEffect } from "react"
 import { Clock, Zap, FlameIcon as Fire } from "lucide-react"
 import ProductCard from "../components/ProductCard"
 import { productsAPI } from "../lib/api"
-import toast from "react-hot-toast"
+import Swal from 'sweetalert2'
 
 export default function FlashSales() {
   const [flashSales, setFlashSales] = useState([])
@@ -56,7 +54,7 @@ export default function FlashSales() {
 
       setFlashSales(flashProducts)
     } catch (error) {
-      toast.error("Error al cargar ofertas flash")
+      Swal.fire('Error al cargar ofertas flash', '', 'error')
     } finally {
       setIsLoading(false)
     }

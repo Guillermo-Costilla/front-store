@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react"
 import { DollarSign, ShoppingBag, Package, AlertTriangle, BarChart3, PieChart } from "lucide-react"
 import { ordersAPI, productsAPI } from "../../lib/api"
-import toast from "react-hot-toast"
+import Swal from 'sweetalert2'
 
 export default function AdminDashboard() {
   const [stats, setStats] = useState({
@@ -61,7 +61,7 @@ export default function AdminDashboard() {
         recentOrders: orders.slice(0, 10),
       })
     } catch (error) {
-      toast.error("Error al cargar datos del dashboard")
+      Swal.fire('Error al cargar datos del dashboard', '', 'error')
     } finally {
       setIsLoading(false)
     }

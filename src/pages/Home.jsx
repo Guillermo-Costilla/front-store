@@ -1,11 +1,9 @@
-"use client"
-
 import { useState, useEffect } from "react"
 import { Link } from "react-router-dom"
 import { ArrowRight, TrendingUp, Zap, Shield, Truck } from "lucide-react"
 import ProductCard from "../components/ProductCard"
 import { productsAPI } from "../lib/api"
-import toast from "react-hot-toast"
+import Swal from 'sweetalert2'
 
 export default function Home() {
   const [featuredProducts, setFeaturedProducts] = useState([])
@@ -24,7 +22,7 @@ export default function Home() {
       setFeaturedProducts(products.slice(0, 4))
       setOffers(products.filter((p) => p.discount).slice(0, 4))
     } catch (error) {
-      toast.error("Error al cargar productos")
+      Swal.fire('Error al cargar productos', '', 'error')
     } finally {
       setIsLoading(false)
     }

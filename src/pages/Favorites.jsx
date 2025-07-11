@@ -1,5 +1,3 @@
-"use client"
-
 import { useState, useEffect } from "react"
 import { Link } from "react-router-dom"
 import { Heart, ShoppingCart, Filter } from "lucide-react"
@@ -142,8 +140,8 @@ export default function Favorites() {
             <div
               key={category}
               className={`card p-4 cursor-pointer transition-colors ${selectedCategory === category
-                  ? "ring-2 ring-primary-500 bg-primary-50 dark:bg-primary-900/20"
-                  : "hover:bg-gray-50 dark:hover:bg-gray-700"
+                ? "ring-2 ring-primary-500 bg-primary-50 dark:bg-primary-900/20"
+                : "hover:bg-gray-50 dark:hover:bg-gray-700"
                 }`}
               onClick={() => setSelectedCategory(category)}
             >

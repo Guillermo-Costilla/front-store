@@ -1,12 +1,10 @@
-"use client"
-
 import { useState } from "react"
 import { Link } from "react-router-dom"
 import { Heart, ShoppingCart, Star, Eye } from "lucide-react"
 import { useAuthStore } from "../store/authStore"
 import { useCartStore } from "../store/cartStore"
 import { useFavoritesStore } from "../store/favoritesStore"
-import toast from "react-hot-toast"
+import Swal from 'sweetalert2'
 
 export default function ProductCard({ product, compact = false }) {
   const [isLoading, setIsLoading] = useState(false)
@@ -44,7 +42,7 @@ export default function ProductCard({ product, compact = false }) {
     e.stopPropagation()
 
     if (!isAuthenticated) {
-      toast.error("Debes iniciar sesión para agregar favoritos")
+      Swal.fire('Debes iniciar sesión para agregar favoritos', '', 'error')
       return
     }
 

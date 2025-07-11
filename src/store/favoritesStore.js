@@ -1,7 +1,7 @@
 import { create } from "zustand"
 import { persist } from "zustand/middleware"
 import { favoritesAPI, productsAPI } from "../lib/api"
-import toast from "react-hot-toast"
+import Swal from 'sweetalert2'
 
 export const useFavoritesStore = create(
   persist(
@@ -71,13 +71,13 @@ export const useFavoritesStore = create(
             }
           }
 
-          toast.success("Producto agregado a favoritos")
+          Swal.fire('Producto agregado a favoritos', '', 'success')
         } catch (error) {
           if (error.response?.status === 409) {
-            toast.error("El producto ya está en favoritos")
+            Swal.fire('El producto ya está en favoritos', '', 'error')
           } else {
             console.error("Error adding favorite:", error)
-            toast.error("Error al agregar a favoritos")
+            Swal.fire('Error al agregar a favoritos', '', 'error')
           }
         }
       },
@@ -99,10 +99,10 @@ export const useFavoritesStore = create(
             favoriteProducts: favoriteProducts.filter((product) => product.id !== productId),
           })
 
-          toast.success("Producto eliminado de favoritos")
+          Swal.fire('Producto eliminado de favoritos', '', 'success')
         } catch (error) {
           console.error("Error removing favorite:", error)
-          toast.error("Error al eliminar de favoritos")
+          Swal.fire('Error al eliminar de favoritos', '', 'error')
         }
       },
 

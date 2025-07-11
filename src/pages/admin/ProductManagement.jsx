@@ -1,9 +1,7 @@
-"use client"
-
 import { useState, useEffect } from "react"
 import { Plus, Edit, Trash2, Search, Filter } from "lucide-react"
 import { productsAPI } from "../../lib/api"
-import toast from "react-hot-toast"
+import Swal from 'sweetalert2'
 
 export default function ProductManagement() {
   const [products, setProducts] = useState([])
@@ -30,7 +28,7 @@ export default function ProductManagement() {
       const response = await productsAPI.getAll()
       setProducts(response.data)
     } catch (error) {
-      toast.error("Error al cargar productos")
+      Swal.fire('Error al cargar productos', '', 'error')
     } finally {
       setIsLoading(false)
     }
@@ -54,17 +52,17 @@ export default function ProductManagement() {
 
       if (editingProduct) {
         await productsAPI.update(editingProduct.id, productData)
-        toast.success("Producto actualizado exitosamente")
+        Swal.fire('Producto actualizado exitosamente', '', 'success')
       } else {
         await productsAPI.create(productData)
-        toast.success("Producto creado exitosamente")
+        Swal.fire('Producto creado exitosamente', '', 'success')
       }
 
       loadProducts()
       setShowModal(false)
       resetForm()
     } catch (error) {
-      toast.error("Error al guardar producto")
+      Swal.fire('Error al guardar producto', '', 'error')
     }
   }
 
@@ -82,13 +80,20 @@ export default function ProductManagement() {
   }
 
   const handleDelete = async (productId) => {
-    if (window.confirm("¿Estás seguro de que quieres eliminar este producto?")) {
+    const result = await Swal.fire({
+      title: '¿Estás seguro de que quieres eliminar este producto?',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Sí',
+      cancelButtonText: 'No'
+    })
+    if (result.isConfirmed) {
       try {
         await productsAPI.delete(productId)
-        toast.success("Producto eliminado exitosamente")
+        Swal.fire('Producto eliminado exitosamente', '', 'success')
         loadProducts()
       } catch (error) {
-        toast.error("Error al eliminar producto")
+        Swal.fire('Error al eliminar producto', '', 'error')
       }
     }
   }
@@ -209,10 +214,10 @@ export default function ProductManagement() {
                   <span className="text-lg font-bold text-primary-600 dark:text-primary-400">${product.precio}</span>
                   <span
                     className={`px-2 py-1 rounded-full text-xs font-medium ${product.stock > 10
-                        ? "bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400"
-                        : product.stock > 0
-                          ? "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400"
-                          : "bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400"
+                      ? "bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400"
+                      : product.stock > 0
+                        ? "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400"
+                        : "bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400"
                       }`}
                   >
                     Stock: {product.stock}

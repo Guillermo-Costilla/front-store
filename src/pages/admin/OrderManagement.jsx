@@ -1,9 +1,7 @@
-"use client"
-
 import { useState, useEffect } from "react"
 import { Search, Filter, Eye, Edit, Package, Truck, CheckCircle, XCircle } from "lucide-react"
 import { ordersAPI } from "../../lib/api"
-import toast from "react-hot-toast"
+import Swal from 'sweetalert2'
 
 export default function OrderManagement() {
   const [orders, setOrders] = useState([])
@@ -22,7 +20,7 @@ export default function OrderManagement() {
       const response = await ordersAPI.getAll()
       setOrders(response.data)
     } catch (error) {
-      toast.error("Error al cargar órdenes")
+      Swal.fire('Error al cargar órdenes', '', 'error')
     } finally {
       setIsLoading(false)
     }
@@ -31,10 +29,10 @@ export default function OrderManagement() {
   const handleStatusChange = async (orderId, newStatus) => {
     try {
       await ordersAPI.updateStatus(orderId, newStatus)
-      toast.success("Estado de la orden actualizado")
+      Swal.fire('Estado de la orden actualizado', '', 'success')
       loadOrders()
     } catch (error) {
-      toast.error("Error al actualizar el estado")
+      Swal.fire('Error al actualizar el estado', '', 'error')
     }
   }
 
@@ -179,11 +177,10 @@ export default function OrderManagement() {
                     {statusOptions.find((s) => s.value === order.estado)?.label || order.estado}
                   </span>
                   <span
-                    className={`px-2 py-1 rounded-full text-xs font-medium ${
-                      order.estado_pago === "pagado"
-                        ? "bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400"
-                        : "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400"
-                    }`}
+                    className={`px-2 py-1 rounded-full text-xs font-medium ${order.estado_pago === "pagado"
+                      ? "bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400"
+                      : "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400"
+                      }`}
                   >
                     {order.estado_pago === "pagado" ? "Pagado" : "Pendiente"}
                   </span>
@@ -329,11 +326,10 @@ export default function OrderManagement() {
                     <div className="flex justify-between text-sm">
                       <span>Estado de pago:</span>
                       <span
-                        className={`font-medium ${
-                          selectedOrder.estado_pago === "pagado"
-                            ? "text-green-600 dark:text-green-400"
-                            : "text-yellow-600 dark:text-yellow-400"
-                        }`}
+                        className={`font-medium ${selectedOrder.estado_pago === "pagado"
+                          ? "text-green-600 dark:text-green-400"
+                          : "text-yellow-600 dark:text-yellow-400"
+                          }`}
                       >
                         {selectedOrder.estado_pago === "pagado" ? "Pagado" : "Pendiente"}
                       </span>

@@ -1,5 +1,3 @@
-"use client"
-
 import { useState, useEffect } from "react"
 import { useParams, Link } from "react-router-dom"
 import { ChevronLeft, ChevronRight, Heart, ShoppingCart, Star, Truck, Shield, RotateCcw } from "lucide-react"
@@ -8,7 +6,7 @@ import { useAuthStore } from "../store/authStore"
 import { useCartStore } from "../store/cartStore"
 import { useFavoritesStore } from "../store/favoritesStore"
 import ProductCard from "../components/ProductCard"
-import toast from "react-hot-toast"
+import Swal from 'sweetalert2'
 
 export default function ProductDetail() {
   const { id } = useParams()
@@ -42,7 +40,7 @@ export default function ProductDetail() {
       setProduct(processedProduct)
       loadRelatedProducts(productData.categoria)
     } catch (error) {
-      toast.error("Error al cargar el producto")
+      Swal.fire('Error al cargar el producto', '', 'error')
     } finally {
       setIsLoading(false)
     }
@@ -73,7 +71,7 @@ export default function ProductDetail() {
 
   const handleToggleFavorite = async () => {
     if (!isAuthenticated) {
-      toast.error("Debes iniciar sesión para agregar favoritos")
+      Swal.fire('Debes iniciar sesión para agregar favoritos', '', 'error')
       return
     }
 

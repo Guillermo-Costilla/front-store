@@ -1,12 +1,10 @@
-"use client"
-
 import { useState, useEffect } from "react"
 import { Link, useNavigate } from "react-router-dom"
 import { ShoppingBag, Heart, DollarSign, TrendingUp, Package, Star, Award, User, Mail, MapPin, Globe } from "lucide-react"
 import { useAuthStore } from "../store/authStore"
 import { useFavoritesStore } from "../store/favoritesStore"
 import { ordersAPI, authAPI } from "../lib/api"
-import toast from "react-hot-toast"
+import Swal from 'sweetalert2'
 
 export default function Dashboard() {
   const [stats, setStats] = useState({
@@ -68,7 +66,7 @@ export default function Dashboard() {
         recentOrders,
       })
     } catch (error) {
-      toast.error("Error al cargar datos del dashboard")
+      Swal.fire('Error al cargar datos del dashboard', '', 'error')
     } finally {
       setIsLoading(false)
     }

@@ -1,6 +1,6 @@
 import { create } from "zustand"
 import { persist } from "zustand/middleware"
-import toast from "react-hot-toast"
+import Swal from 'sweetalert2'
 
 export const useCouponsStore = create(
   persist(
@@ -47,12 +47,12 @@ export const useCouponsStore = create(
         const coupon = availableCoupons.find((c) => c.code.toLowerCase() === code.toLowerCase() && c.isActive)
 
         if (!coupon) {
-          toast.error("Cupón no válido o expirado")
+          Swal.fire('Cupón no válido o expirado', '', 'error')
           return false
         }
 
         if (orderAmount < coupon.minAmount) {
-          toast.error(`Este cupón requiere una compra mínima de $${coupon.minAmount}`)
+          Swal.fire(`Este cupón requiere una compra mínima de $${coupon.minAmount}`, '', 'error')
           return false
         }
 
@@ -60,18 +60,18 @@ export const useCouponsStore = create(
         const now = new Date()
         const expirationDate = new Date(coupon.expiresAt)
         if (now > expirationDate) {
-          toast.error("Este cupón ha expirado")
+          Swal.fire('Este cupón ha expirado', '', 'error')
           return false
         }
 
         set({ appliedCoupon: coupon })
-        toast.success(`Cupón ${coupon.code} aplicado exitosamente`)
+        Swal.fire(`Cupón ${coupon.code} aplicado exitosamente`, '', 'success')
         return true
       },
 
       removeCoupon: () => {
         set({ appliedCoupon: null })
-        toast.success("Cupón removido")
+        Swal.fire('Cupón removido', '', 'success')
       },
 
       calculateDiscount: (orderAmount) => {

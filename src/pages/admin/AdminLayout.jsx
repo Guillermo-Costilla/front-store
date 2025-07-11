@@ -1,5 +1,3 @@
-"use client"
-
 import { useState } from "react"
 import { Link, Outlet, useLocation } from "react-router-dom"
 import { LayoutDashboard, Package, ShoppingBag, Users, BarChart3, Settings, Menu, X, ArrowLeft } from "lucide-react"
@@ -41,11 +39,10 @@ export default function AdminLayout() {
                     key={item.name}
                     to={item.href}
                     onClick={() => setSidebarOpen(false)}
-                    className={`flex items-center space-x-3 px-3 py-2 rounded-lg transition-colors ${
-                      isActive
-                        ? "bg-primary-100 dark:bg-primary-900/20 text-primary-600 dark:text-primary-400"
-                        : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
-                    }`}
+                    className={`flex items-center space-x-3 px-3 py-2 rounded-lg transition-colors ${isActive
+                      ? "bg-primary-100 dark:bg-primary-900/20 text-primary-600 dark:text-primary-400"
+                      : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+                      }`}
                   >
                     <item.icon className="h-5 w-5" />
                     <span>{item.name}</span>
@@ -77,11 +74,10 @@ export default function AdminLayout() {
                 <Link
                   key={item.name}
                   to={item.href}
-                  className={`flex items-center space-x-3 px-3 py-2 rounded-lg transition-colors ${
-                    isActive
-                      ? "bg-primary-100 dark:bg-primary-900/20 text-primary-600 dark:text-primary-400"
-                      : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
-                  }`}
+                  className={`flex items-center space-x-3 px-3 py-2 rounded-lg transition-colors ${isActive
+                    ? "bg-primary-100 dark:bg-primary-900/20 text-primary-600 dark:text-primary-400"
+                    : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+                    }`}
                 >
                   <item.icon className="h-5 w-5" />
                   <span>{item.name}</span>

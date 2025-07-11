@@ -1,7 +1,7 @@
 import { create } from "zustand"
 import { persist } from "zustand/middleware"
 import { authAPI } from "../lib/api"
-import toast from "react-hot-toast"
+import Swal from 'sweetalert2'
 
 export const useAuthStore = create(
   persist(
@@ -25,12 +25,12 @@ export const useAuthStore = create(
             isLoading: false,
           })
 
-          toast.success("¡Bienvenido de vuelta!")
+          Swal.fire('¡Bienvenido de vuelta!', '', 'success')
           return { success: true }
         } catch (error) {
           set({ isLoading: false })
           const message = error.response?.data?.message || "Error al iniciar sesión"
-          toast.error(message)
+          Swal.fire(message, '', 'error')
           return { success: false, error: message }
         }
       },
@@ -49,12 +49,12 @@ export const useAuthStore = create(
             isLoading: false,
           })
 
-          toast.success("¡Cuenta creada exitosamente!")
+          Swal.fire('¡Cuenta creada exitosamente!', '', 'success')
           return { success: true }
         } catch (error) {
           set({ isLoading: false })
           const message = error.response?.data?.message || "Error al crear cuenta"
-          toast.error(message)
+          Swal.fire(message, '', 'error')
           return { success: false, error: message }
         }
       },
@@ -67,7 +67,7 @@ export const useAuthStore = create(
           token: null,
           isAuthenticated: false,
         })
-        toast.success("Sesión cerrada")
+        Swal.fire('Sesión cerrada', '', 'success')
       },
 
       checkAuth: async () => {
@@ -100,12 +100,12 @@ export const useAuthStore = create(
             user: response.data,
             isLoading: false,
           })
-          toast.success("Perfil actualizado exitosamente")
+          Swal.fire('Perfil actualizado exitosamente', '', 'success')
           return { success: true }
         } catch (error) {
           set({ isLoading: false })
           const message = error.response?.data?.message || "Error al actualizar perfil"
-          toast.error(message)
+          Swal.fire(message, '', 'error')
           return { success: false, error: message }
         }
       },

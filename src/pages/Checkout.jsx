@@ -1,5 +1,3 @@
-"use client"
-
 import { useState, useEffect } from "react"
 import { useNavigate } from "react-router-dom"
 import { Elements, CardElement, useStripe, useElements } from "@stripe/react-stripe-js"
@@ -9,7 +7,7 @@ import { useCartStore } from "../store/cartStore"
 import { useCouponsStore } from "../store/couponsStore"
 import { useAuthStore } from "../store/authStore"
 import { paymentsAPI, ordersAPI } from "../lib/api"
-import toast from "react-hot-toast"
+import Swal from 'sweetalert2'
 
 const stripePromise = getStripe()
 
@@ -62,7 +60,7 @@ function CheckoutForm() {
 
     // Validar información de envío
     if (!shippingInfo.address || !shippingInfo.city || !shippingInfo.state || !shippingInfo.zipCode) {
-      toast.error("Por favor completa toda la información de envío")
+      Swal.fire('Por favor completa toda la información de envío', '', 'error')
       return
     }
 
@@ -109,9 +107,9 @@ function CheckoutForm() {
 
       if (error) {
         if (error.type === "card_error" || error.type === "validation_error") {
-          toast.error(error.message)
+          Swal.fire(error.message, '', 'error')
         } else {
-          toast.error("Error inesperado en el pago")
+          Swal.fire('Error inesperado en el pago', '', 'error')
         }
         return
       }
@@ -120,13 +118,13 @@ function CheckoutForm() {
         // Limpiar carrito y cupones
         clearCart()
         removeCoupon()
-        toast.success("¡Pago procesado exitosamente!")
+        Swal.fire('¡Pago procesado exitosamente!', '', 'success')
         setPolling(true)
         // Redirigir a órdenes después de polling
       }
     } catch (error) {
       console.error("Error processing order:", error)
-      toast.error(error.response?.data?.message || "Error al procesar la orden")
+      Swal.fire(error.response?.data?.message || 'Error al procesar la orden', '', 'error')
     } finally {
       setIsProcessing(false)
     }
@@ -167,7 +165,7 @@ function CheckoutForm() {
           const response = await ordersAPI.getUserOrders()
           const order = response.data.find((o) => o.id === createdOrderId)
           if (order && order.pago === "pagado") {
-            toast.success("¡El pago de tu orden fue confirmado!")
+            Swal.fire('¡El pago de tu orden fue confirmado!', '', 'success')
             setPolling(false)
             navigate("/ordenes")
           }
