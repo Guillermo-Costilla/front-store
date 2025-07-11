@@ -1,6 +1,6 @@
 import { useState } from "react"
 import { Link, useNavigate } from "react-router-dom"
-import { Eye, EyeOff, Mail, Lock, User, MapPin, Globe } from "lucide-react"
+import { Eye, EyeOff, Mail, Lock, User } from "lucide-react"
 import { useAuthStore } from "../store/authStore"
 
 export default function Register() {
@@ -9,9 +9,6 @@ export default function Register() {
     email: "",
     password: "",
     confirmPassword: "",
-    pais: "Argentina",
-    localidad: "Buenos Aires",
-    codigo_postal: "1000",
   })
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
@@ -38,9 +35,9 @@ export default function Register() {
   const validateForm = () => {
     const newErrors = {}
 
-    if (!formData.nombre.trim()) {
+    if (!formData.nombre) {
       newErrors.nombre = "El nombre es requerido"
-    } else if (formData.nombre.trim().length < 2) {
+    } else if (formData.nombre.length < 2) {
       newErrors.nombre = "El nombre debe tener al menos 2 caracteres"
     }
 
@@ -71,10 +68,7 @@ export default function Register() {
 
     if (!validateForm()) return
 
-    // Preparar datos para el backend (sin confirmPassword)
     const { confirmPassword, ...userData } = formData
-    userData.nombre = userData.nombre.trim()
-
     const result = await register(userData)
 
     if (result.success) {
@@ -99,7 +93,7 @@ export default function Register() {
           <div className="space-y-4">
             <div>
               <label htmlFor="nombre" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                Nombre Completo
+                Nombre completo
               </label>
               <div className="relative">
                 <User className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
@@ -135,62 +129,6 @@ export default function Register() {
               {errors.email && <p className="mt-1 text-sm text-red-600">{errors.email}</p>}
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label htmlFor="pais" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  País
-                </label>
-                <div className="relative">
-                  <Globe className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
-                  <input
-                    id="pais"
-                    name="pais"
-                    type="text"
-                    value={formData.pais}
-                    onChange={handleChange}
-                    className="input pl-10"
-                    placeholder="Argentina"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label htmlFor="localidad" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  Localidad
-                </label>
-                <div className="relative">
-                  <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
-                  <input
-                    id="localidad"
-                    name="localidad"
-                    type="text"
-                    value={formData.localidad}
-                    onChange={handleChange}
-                    className="input pl-10"
-                    placeholder="Buenos Aires"
-                  />
-                </div>
-              </div>
-            </div>
-
-            <div>
-              <label
-                htmlFor="codigo_postal"
-                className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-              >
-                Código Postal
-              </label>
-              <input
-                id="codigo_postal"
-                name="codigo_postal"
-                type="text"
-                value={formData.codigo_postal}
-                onChange={handleChange}
-                className="input"
-                placeholder="1000"
-              />
-            </div>
-
             <div>
               <label htmlFor="password" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Contraseña
@@ -204,7 +142,7 @@ export default function Register() {
                   value={formData.password}
                   onChange={handleChange}
                   className={`input pl-10 pr-10 ${errors.password ? "border-red-500" : ""}`}
-                  placeholder="Mínimo 6 caracteres"
+                  placeholder="Tu contraseña"
                 />
                 <button
                   type="button"
@@ -222,7 +160,7 @@ export default function Register() {
                 htmlFor="confirmPassword"
                 className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
               >
-                Confirmar Contraseña
+                Confirmar contraseña
               </label>
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
@@ -257,7 +195,7 @@ export default function Register() {
             />
             <label htmlFor="terms" className="ml-2 block text-sm text-gray-700 dark:text-gray-300">
               Acepto los{" "}
-              <Link to="/terminos" className="text-primary-600 hover:text-primary-500">
+              <Link to="/terms" className="text-primary-600 hover:text-primary-500">
                 términos y condiciones
               </Link>
             </label>
@@ -267,8 +205,8 @@ export default function Register() {
             type="submit"
             disabled={isLoading}
             className={`w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white transition-colors ${isLoading
-              ? "bg-gray-400 cursor-not-allowed"
-              : "bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
+                ? "bg-gray-400 cursor-not-allowed"
+                : "bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
               }`}
           >
             {isLoading ? (
