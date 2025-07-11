@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react"
 import { DollarSign, ShoppingBag, Package, AlertTriangle, BarChart3, PieChart } from "lucide-react"
-import { ordersAPI, productsAPI } from "../../lib/api"
+import { ordersAPI, productsAPI, adminAPI } from "../../lib/api"
 import Swal from 'sweetalert2'
 
 export default function AdminDashboard() {
@@ -21,44 +21,17 @@ export default function AdminDashboard() {
 
   const loadDashboardData = async () => {
     try {
-      // Cargar datos del dashboard admin
-      const [, ordersResponse, productsResponse] = await Promise.all([
-
-        ordersAPI.getAll(),
-        productsAPI.getAll(),
-      ])
-
-
-      const orders = ordersResponse.data
-      const products = productsResponse.data
-
-      // Calcular estadísticas
-      const totalRevenue = orders.reduce((sum, order) => sum + Number.parseFloat(order.total), 0)
-      const lowStockProducts = products.filter((product) => product.stock < 10).length
-
-      // Órdenes por estado
-      const ordersByStatus = orders.reduce((acc, order) => {
-        acc[order.estado] = (acc[order.estado] || 0) + 1
-        return acc
-      }, {})
-
-      // Productos más vendidos (simulado)
-      const topProducts = products
-        .slice(0, 5)
-        .map((product) => ({
-          ...product,
-          sold: Math.floor(Math.random() * 100) + 10,
-        }))
-        .sort((a, b) => b.sold - a.sold)
-
+      // Usar el endpoint de admin para dashboard
+      const response = await adminAPI.getDashboard()
+      const data = response.data
       setStats({
-        totalRevenue,
-        totalOrders: orders.length,
-        totalProducts: products.length,
-        lowStockProducts,
-        ordersByStatus,
-        topProducts,
-        recentOrders: orders.slice(0, 10),
+        totalRevenue: data.total_ventas || 0,
+        totalOrders: data.total_ordenes || 0,
+        totalProducts: data.total_productos || 0,
+        lowStockProducts: data.productos_stock_bajo?.length || 0,
+        ordersByStatus: data.ordenes_por_estado || {},
+        topProducts: data.productos_mas_vendidos || [],
+        recentOrders: data.ordenes_recientes || [],
       })
     } catch (error) {
       Swal.fire('Error al cargar datos del dashboard', '', 'error')

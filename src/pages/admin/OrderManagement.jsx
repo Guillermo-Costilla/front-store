@@ -17,7 +17,7 @@ export default function OrderManagement() {
 
   const loadOrders = async () => {
     try {
-      const response = await ordersAPI.getAll()
+      const response = await ordersAPI.getAllOrders()
       setOrders(response.data)
     } catch (error) {
       Swal.fire('Error al cargar órdenes', '', 'error')
