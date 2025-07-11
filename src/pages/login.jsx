@@ -146,8 +146,8 @@ export default function Login() {
             type="submit"
             disabled={isLoading}
             className={`w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white transition-colors ${isLoading
-                ? "bg-gray-400 cursor-not-allowed"
-                : "bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
+              ? "bg-gray-400 cursor-not-allowed"
+              : "bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
               }`}
           >
             {isLoading ? (
@@ -165,10 +165,10 @@ export default function Login() {
             <h3 className="text-sm font-medium text-blue-800 dark:text-blue-200 mb-2">Credenciales de prueba:</h3>
             <div className="text-sm text-blue-600 dark:text-blue-300 space-y-1">
               <p>
-                <strong>Admin:</strong> admin@tienda.com / password123
+                <strong>Admin:</strong> admin@tienda.com / password
               </p>
               <p>
-                <strong>Usuario:</strong> Crea tu cuenta o usa las credenciales admin
+                <strong>Usuario:</strong> Crea tu cuenta con un mail real o usa las credenciales admin
               </p>
             </div>
           </div>
