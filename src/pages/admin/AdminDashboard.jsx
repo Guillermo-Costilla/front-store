@@ -59,6 +59,16 @@ export default function AdminDashboard() {
     )
   }
 
+  // Normalizar ordersByStatus para soportar array u objeto
+  let ordersByStatus = stats.ordersByStatus
+  if (Array.isArray(ordersByStatus)) {
+    // Convertir array de objetos {estado, cantidad} a objeto { estado: cantidad }
+    ordersByStatus = ordersByStatus.reduce((acc, curr) => {
+      acc[curr.estado] = curr.cantidad
+      return acc
+    }, {})
+  }
+
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       {/* Header */}
@@ -127,7 +137,7 @@ export default function AdminDashboard() {
           </div>
 
           <div className="space-y-4">
-            {Object.entries(stats.ordersByStatus).map(([status, count]) => {
+            {Object.entries(ordersByStatus).map(([status, count]) => {
               const percentage = (count / stats.totalOrders) * 100
               const statusColors = {
                 pendiente: "bg-yellow-500",
