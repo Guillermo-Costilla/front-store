@@ -74,4 +74,25 @@
   .input {
     @apply w-full px-3 py-2 border border-input rounded-lg bg-background text-foreground focus:ring-2 focus:ring-ring focus:border-transparent;
   }
+
+  /* Estilos para Stripe CardElement en modo oscuro */
+  .dark .stripe-card-element .StripeElement {
+    color: #f3f4f6 !important; /* Texto blanco/gris claro en modo oscuro */
+  }
+
+  .dark .stripe-card-element .StripeElement--focus {
+    color: #f3f4f6 !important;
+  }
+
+  .dark .stripe-card-element .StripeElement--invalid {
+    color: #fca5a5 !important; /* Rojo claro para errores en modo oscuro */
+  }
+
+  .dark .stripe-card-element .StripeElement--complete {
+    color: #f3f4f6 !important;
+  }
+
+  .dark .stripe-card-element .StripeElement--empty {
+    color: #9ca3af !important; /* Placeholder en modo oscuro */
+  }
 }

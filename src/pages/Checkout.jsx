@@ -148,10 +148,16 @@ function CheckoutForm() {
     style: {
       base: {
         fontSize: "16px",
-        color: "#424770",
+        color: "#1f2937", // Gris oscuro para modo claro
         "::placeholder": {
-          color: "#aab7c4",
+          color: "#9ca3af",
         },
+        ":-webkit-autofill": {
+          color: "#1f2937",
+        },
+      },
+      invalid: {
+        color: "#ef4444",
       },
     },
   }
@@ -211,7 +217,7 @@ function CheckoutForm() {
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Ciudad</label>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Localidad</label>
                   <input
                     type="text"
                     name="city"
@@ -222,7 +228,7 @@ function CheckoutForm() {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Estado</label>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Provincia</label>
                   <input
                     type="text"
                     name="state"
@@ -275,7 +281,7 @@ function CheckoutForm() {
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Información de la Tarjeta
                 </label>
-                <div className="p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700">
+                <div className="p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 stripe-card-element">
                   <CardElement options={cardElementOptions} />
                 </div>
               </div>
