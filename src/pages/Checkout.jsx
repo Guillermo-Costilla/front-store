@@ -9,8 +9,6 @@ import { useAuthStore } from "../store/authStore"
 import { paymentsAPI, ordersAPI } from "../lib/api"
 import Swal from 'sweetalert2'
 
-const stripePromise = getStripe()
-
 function CheckoutForm() {
   const stripe = useStripe()
   const elements = useElements()
@@ -20,12 +18,10 @@ function CheckoutForm() {
   const [clientSecret, setClientSecret] = useState("")
   const [couponCode, setCouponCode] = useState("")
   const [shippingInfo, setShippingInfo] = useState({
-    address: "",
-    city: "",
-    state: "",
-    zipCode: "",
-    country: "México",
-    phone: "",
+    direccion: "",
+    localidad: "",
+    provincia: "",
+    codigo_postal: "",
   })
   const [createdOrderId, setCreatedOrderId] = useState(null)
   const [polling, setPolling] = useState(false)
@@ -50,7 +46,7 @@ function CheckoutForm() {
     }
   }, [isAuthenticated, items.length, navigate])
 
-  // Primero creamos la orden y luego el payment intent
+  // Flujo correcto: primero crear la orden, luego procesar el pago
   const handleSubmit = async (event) => {
     event.preventDefault()
 
@@ -59,7 +55,7 @@ function CheckoutForm() {
     }
 
     // Validar información de envío
-    if (!shippingInfo.address || !shippingInfo.city || !shippingInfo.state || !shippingInfo.zipCode) {
+    if (!shippingInfo.direccion || !shippingInfo.localidad || !shippingInfo.provincia || !shippingInfo.codigo_postal) {
       Swal.fire('Por favor completa toda la información de envío', '', 'error')
       return
     }
@@ -67,39 +63,123 @@ function CheckoutForm() {
     setIsProcessing(true)
 
     try {
-      // 1. Crear la orden en el backend primero
+      // 1. Crear la orden en el backend primero (sin payment_intent_id)
       const orderData = {
         productos: items.map((item) => ({
           producto_id: item.id,
           cantidad: item.quantity,
         })),
+        direccion: shippingInfo.direccion,
+        localidad: shippingInfo.localidad,
+        provincia: shippingInfo.provincia,
+        codigo_postal: shippingInfo.codigo_postal,
       }
 
-      // Crear la orden
+      console.log("Creando orden con datos:", orderData)
+      console.log("Items del carrito:", items)
+      console.log("Productos mapeados:", items.map((item) => ({
+        producto_id: item.id,
+        cantidad: item.quantity,
+      })))
+      console.log("Formato esperado según README:", {
+        productos: [
+          { producto_id: "uuid1", cantidad: 2 },
+          { producto_id: "uuid2", cantidad: 1 }
+        ],
+        direccion: "Av. Corrientes 1234",
+        localidad: "Buenos Aires",
+        provincia: "Buenos Aires",
+        codigo_postal: "1043"
+      })
+
       const orderResponse = await ordersAPI.create(orderData)
 
-      if (!orderResponse.data || !orderResponse.data.client_secret) {
+      console.log("Respuesta de creación de orden:", orderResponse)
+      console.log("Respuesta completa de orden:", orderResponse.data)
+      console.log("Keys de la respuesta de orden:", Object.keys(orderResponse.data || {}))
+
+      // Según la documentación, debería devolver un objeto con id
+      const orderId = orderResponse.data?.id
+
+      console.log("Order ID encontrado:", orderId)
+
+      if (!orderId) {
+        console.error("Respuesta incompleta de la orden:", orderResponse.data)
         throw new Error("No se pudo crear la orden")
       }
 
-      const { client_secret, payment_intent_id, orden_id } = orderResponse.data
-      setCreatedOrderId(orden_id)
+      setCreatedOrderId(orderId)
 
-      // 2. Confirmar el pago con Stripe usando el client_secret que nos devolvió el backend
+      // 2. Crear PaymentIntent con Stripe
+      const paymentIntentData = {
+        amount: Math.round(finalTotal * 100), // Convertir a centavos
+        currency: "usd",
+        items: items.map(item => ({
+          id: item.id,
+          name: item.name,
+          price: item.price,
+          quantity: item.quantity
+        })),
+        customer: {
+          email: user?.email || "",
+          name: user?.nombre || user?.name || ""
+        }
+      }
+
+      console.log("Creando PaymentIntent con datos:", paymentIntentData)
+      console.log("Total final:", finalTotal)
+      console.log("Amount en centavos:", Math.round(finalTotal * 100))
+      console.log("Items mapeados para PaymentIntent:", items.map(item => ({
+        id: item.id,
+        name: item.name,
+        price: item.price,
+        quantity: item.quantity
+      })))
+      console.log("Formato esperado según README:", {
+        amount: 5000,
+        currency: "usd",
+        items: [
+          { id: "uuid1", name: "Producto 1", price: 1000, quantity: 2 },
+          { id: "uuid2", name: "Producto 2", price: 2000, quantity: 1 }
+        ],
+        customer: { email: "juan@mail.com", name: "Juan" }
+      })
+
+      const paymentIntentResponse = await paymentsAPI.createPaymentIntent(paymentIntentData)
+
+      console.log("Respuesta de PaymentIntent:", paymentIntentResponse)
+      console.log("Respuesta completa:", paymentIntentResponse.data)
+      console.log("Keys de la respuesta:", Object.keys(paymentIntentResponse.data || {}))
+
+      // Según la documentación, debería devolver client_secret y payment_intent_id
+      const clientSecret = paymentIntentResponse.data?.client_secret
+      const paymentIntentId = paymentIntentResponse.data?.payment_intent_id
+
+      console.log("Client Secret encontrado:", clientSecret)
+      console.log("Payment Intent ID encontrado:", paymentIntentId)
+
+      if (!clientSecret || !paymentIntentId) {
+        console.error("Respuesta incompleta del PaymentIntent:", paymentIntentResponse.data)
+        throw new Error("No se pudo crear el PaymentIntent")
+      }
+
+      setClientSecret(clientSecret)
+
+      // 3. Confirmar el pago con Stripe
       const cardElement = elements.getElement(CardElement)
 
-      const { error, paymentIntent } = await stripe.confirmCardPayment(client_secret, {
+      const { error, paymentIntent } = await stripe.confirmCardPayment(clientSecret, {
         payment_method: {
           card: cardElement,
           billing_details: {
             name: user?.nombre || user?.name || "",
             email: user?.email || "",
             address: {
-              line1: shippingInfo.address,
-              city: shippingInfo.city,
-              state: shippingInfo.state,
-              postal_code: shippingInfo.zipCode,
-              country: shippingInfo.country,
+              line1: shippingInfo.direccion,
+              city: shippingInfo.localidad,
+              state: shippingInfo.provincia,
+              postal_code: shippingInfo.codigo_postal,
+              country: "AR", // Argentina por defecto
             },
           },
         },
@@ -108,6 +188,8 @@ function CheckoutForm() {
       if (error) {
         if (error.type === "card_error" || error.type === "validation_error") {
           Swal.fire(error.message, '', 'error')
+        } else if (error.code === "PAYMENT_METHOD_REJECTED" || paymentIntent?.status === "requires_payment_method") {
+          Swal.fire('La tarjeta fue rechazada. Por favor, intenta con otra tarjeta.', '', 'error')
         } else {
           Swal.fire('Error inesperado en el pago', '', 'error')
         }
@@ -115,6 +197,18 @@ function CheckoutForm() {
       }
 
       if (paymentIntent.status === "succeeded") {
+        // 4. Confirmar el pago en el backend
+        try {
+          await paymentsAPI.confirmPayment({
+            payment_intent_id: paymentIntentId,
+            payment_method_id: paymentIntent.payment_method,
+            order_id: orderId
+          })
+        } catch (confirmError) {
+          console.error("Error confirmando pago:", confirmError)
+          // No fallar aquí, el pago ya fue exitoso en Stripe
+        }
+
         // Limpiar carrito y cupones
         clearCart()
         removeCoupon()
@@ -124,7 +218,22 @@ function CheckoutForm() {
       }
     } catch (error) {
       console.error("Error processing order:", error)
-      Swal.fire(error.response?.data?.message || 'Error al procesar la orden', '', 'error')
+      console.error("Error response:", error.response)
+      console.error("Error data:", error.response?.data)
+      console.error("Error status:", error.response?.status)
+      console.error("Error message:", error.message)
+
+      let errorMessage = 'Error al procesar la orden'
+
+      if (error.response?.data?.message) {
+        errorMessage = error.response.data.message
+      } else if (error.response?.data?.error) {
+        errorMessage = error.response.data.error
+      } else if (error.message) {
+        errorMessage = error.message
+      }
+
+      Swal.fire(errorMessage, '', 'error')
     } finally {
       setIsProcessing(false)
     }
@@ -206,8 +315,8 @@ function CheckoutForm() {
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Dirección</label>
                 <input
                   type="text"
-                  name="address"
-                  value={shippingInfo.address}
+                  name="direccion"
+                  value={shippingInfo.direccion}
                   onChange={handleShippingChange}
                   required
                   className="input"
@@ -220,8 +329,8 @@ function CheckoutForm() {
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Localidad</label>
                   <input
                     type="text"
-                    name="city"
-                    value={shippingInfo.city}
+                    name="localidad"
+                    value={shippingInfo.localidad}
                     onChange={handleShippingChange}
                     required
                     className="input"
@@ -231,8 +340,8 @@ function CheckoutForm() {
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Provincia</label>
                   <input
                     type="text"
-                    name="state"
-                    value={shippingInfo.state}
+                    name="provincia"
+                    value={shippingInfo.provincia}
                     onChange={handleShippingChange}
                     required
                     className="input"
@@ -240,31 +349,18 @@ function CheckoutForm() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                    Código Postal
-                  </label>
-                  <input
-                    type="text"
-                    name="zipCode"
-                    value={shippingInfo.zipCode}
-                    onChange={handleShippingChange}
-                    required
-                    className="input"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Teléfono</label>
-                  <input
-                    type="tel"
-                    name="phone"
-                    value={shippingInfo.phone}
-                    onChange={handleShippingChange}
-                    required
-                    className="input"
-                  />
-                </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Código Postal
+                </label>
+                <input
+                  type="text"
+                  name="codigo_postal"
+                  value={shippingInfo.codigo_postal}
+                  onChange={handleShippingChange}
+                  required
+                  className="input"
+                />
               </div>
             </div>
           </div>
@@ -412,7 +508,7 @@ function CheckoutForm() {
             <h3 className="font-semibold text-gray-900 dark:text-white mb-3">Información de Envío</h3>
             <div className="space-y-2 text-sm text-gray-600 dark:text-gray-400">
               <p>• Envío gratis en todas las compras</p>
-              <p>• Entrega en 24-48 horas hábiles</p>
+              <p>• Entrega en 48 horas hábiles</p>
               <p>• Seguimiento incluido</p>
               <p>• Garantía de satisfacción</p>
             </div>
@@ -424,6 +520,57 @@ function CheckoutForm() {
 }
 
 export default function Checkout() {
+  const [stripePromise, setStripePromise] = useState(null)
+  const [isLoading, setIsLoading] = useState(true)
+
+  useEffect(() => {
+    const loadStripe = async () => {
+      try {
+        const stripe = await getStripe()
+        setStripePromise(stripe)
+      } catch (error) {
+        console.error("Error loading Stripe:", error)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    loadStripe()
+  }, [])
+
+  if (isLoading) {
+    return (
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="animate-pulse">
+          <div className="h-8 bg-gray-300 dark:bg-gray-600 rounded w-1/4 mb-8"></div>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <div className="space-y-6">
+              {Array.from({ length: 3 }).map((_, i) => (
+                <div key={i} className="card p-6">
+                  <div className="bg-gray-300 dark:bg-gray-600 h-32 rounded"></div>
+                </div>
+              ))}
+            </div>
+            <div className="card p-6">
+              <div className="bg-gray-300 dark:bg-gray-600 h-64 rounded"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  if (!stripePromise) {
+    return (
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">Error al cargar el sistema de pagos</h1>
+          <p className="text-gray-600 dark:text-gray-400">Por favor, intenta recargar la página</p>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <Elements stripe={stripePromise}>
       <CheckoutForm />

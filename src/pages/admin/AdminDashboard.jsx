@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react"
 import { DollarSign, ShoppingBag, Package, AlertTriangle, BarChart3, PieChart } from "lucide-react"
-import { ordersAPI, productsAPI, adminAPI } from "../../lib/api"
+import { adminAPI } from "../../lib/api"
 import Swal from 'sweetalert2'
 
 export default function AdminDashboard() {
@@ -10,6 +10,7 @@ export default function AdminDashboard() {
     totalProducts: 0,
     lowStockProducts: 0,
     ordersByStatus: {},
+    ordersByPayment: {},
     topProducts: [],
     recentOrders: [],
   })
@@ -23,15 +24,17 @@ export default function AdminDashboard() {
     try {
       // Usar el endpoint de admin para dashboard
       const response = await adminAPI.getDashboard()
-      const data = response.data
+      const data = response.data.metricas || response.data
+
       setStats({
-        totalRevenue: data.total_ventas || 0,
-        totalOrders: data.total_ordenes || 0,
-        totalProducts: data.total_productos || 0,
-        lowStockProducts: data.productos_stock_bajo?.length || 0,
-        ordersByStatus: data.ordenes_por_estado || {},
-        topProducts: data.productos_mas_vendidos || [],
-        recentOrders: data.ordenes_recientes || [],
+        totalRevenue: data.ventas?.total || 0,
+        totalOrders: data.ordenes?.total || 0,
+        totalProducts: data.productos?.total || 0,
+        lowStockProducts: data.productos?.stock_bajo?.length || 0,
+        ordersByStatus: data.ordenes?.por_estado || [],
+        ordersByPayment: data.ordenes?.por_pago || [],
+        topProducts: data.productos?.mas_vendidos || [],
+        recentOrders: data.ordenes?.recientes || [],
       })
     } catch (error) {
       Swal.fire('Error al cargar datos del dashboard', '', 'error')
@@ -65,6 +68,15 @@ export default function AdminDashboard() {
     // Convertir array de objetos {estado, cantidad} a objeto { estado: cantidad }
     ordersByStatus = ordersByStatus.reduce((acc, curr) => {
       acc[curr.estado] = curr.cantidad
+      return acc
+    }, {})
+  }
+
+  // Normalizar ordersByPayment
+  let ordersByPayment = stats.ordersByPayment
+  if (Array.isArray(ordersByPayment)) {
+    ordersByPayment = ordersByPayment.reduce((acc, curr) => {
+      acc[curr.pago] = curr.cantidad
       return acc
     }, {})
   }
@@ -140,17 +152,23 @@ export default function AdminDashboard() {
             {Object.entries(ordersByStatus).map(([status, count]) => {
               const percentage = (count / stats.totalOrders) * 100
               const statusColors = {
-                pendiente: "bg-yellow-500",
-                procesando: "bg-blue-500",
-                enviado: "bg-purple-500",
-                entregado: "bg-green-500",
+                pendiente_envio: "bg-yellow-500",
+                enviado: "bg-blue-500",
                 cancelado: "bg-red-500",
+              }
+
+              const statusLabels = {
+                pendiente_envio: "Pendiente de Envío",
+                enviado: "Enviado",
+                cancelado: "Cancelado",
               }
 
               return (
                 <div key={status} className="space-y-2">
                   <div className="flex justify-between items-center">
-                    <span className="text-sm font-medium text-gray-700 dark:text-gray-300 capitalize">{status}</span>
+                    <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                      {statusLabels[status] || status}
+                    </span>
                     <span className="text-sm font-bold text-gray-900 dark:text-white">
                       {count} ({percentage.toFixed(1)}%)
                     </span>
@@ -167,36 +185,80 @@ export default function AdminDashboard() {
           </div>
         </div>
 
-        {/* Productos más vendidos */}
+        {/* Órdenes por estado de pago */}
         <div className="card p-6">
           <div className="flex items-center space-x-2 mb-6">
-            <BarChart3 className="h-5 w-5 text-primary-600" />
-            <h2 className="text-xl font-bold text-gray-900 dark:text-white">Productos Más Vendidos</h2>
+            <PieChart className="h-5 w-5 text-primary-600" />
+            <h2 className="text-xl font-bold text-gray-900 dark:text-white">Órdenes por Estado de Pago</h2>
           </div>
 
           <div className="space-y-4">
-            {stats.topProducts.map((product, index) => (
-              <div key={product.id} className="flex items-center space-x-4">
-                <div className="flex-shrink-0">
-                  <span className="inline-flex items-center justify-center w-8 h-8 bg-primary-100 dark:bg-primary-900/20 text-primary-600 dark:text-primary-400 rounded-full text-sm font-bold">
-                    {index + 1}
-                  </span>
+            {Object.entries(ordersByPayment).map(([paymentStatus, count]) => {
+              const percentage = (count / stats.totalOrders) * 100
+              const paymentColors = {
+                pagado: "bg-green-500",
+                pendiente: "bg-yellow-500",
+                cancelado: "bg-red-500",
+              }
+
+              const paymentLabels = {
+                pagado: "Pagado",
+                pendiente: "Pendiente",
+                cancelado: "Cancelado",
+              }
+
+              return (
+                <div key={paymentStatus} className="space-y-2">
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                      {paymentLabels[paymentStatus] || paymentStatus}
+                    </span>
+                    <span className="text-sm font-bold text-gray-900 dark:text-white">
+                      {count} ({percentage.toFixed(1)}%)
+                    </span>
+                  </div>
+                  <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                    <div
+                      className={`h-2 rounded-full ${paymentColors[paymentStatus] || "bg-gray-500"}`}
+                      style={{ width: `${percentage}%` }}
+                    ></div>
+                  </div>
                 </div>
-                <img
-                  src={product.image || "/placeholder.svg?height=40&width=40"}
-                  alt={product.name}
-                  className="w-10 h-10 object-cover rounded-lg"
-                />
-                <div className="flex-1 min-w-0">
-                  <p className="font-medium text-gray-900 dark:text-white truncate">{product.name}</p>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">{product.sold} vendidos</p>
-                </div>
-                <div className="text-right">
-                  <p className="font-bold text-gray-900 dark:text-white">${product.price}</p>
-                </div>
-              </div>
-            ))}
+              )
+            })}
           </div>
+        </div>
+      </div>
+
+      {/* Productos más vendidos */}
+      <div className="card p-6 mb-8">
+        <div className="flex items-center space-x-2 mb-6">
+          <BarChart3 className="h-5 w-5 text-primary-600" />
+          <h2 className="text-xl font-bold text-gray-900 dark:text-white">Productos Más Vendidos</h2>
+        </div>
+
+        <div className="space-y-4">
+          {stats.topProducts.map((product, index) => (
+            <div key={product.id} className="flex items-center space-x-4">
+              <div className="flex-shrink-0">
+                <span className="inline-flex items-center justify-center w-8 h-8 bg-primary-100 dark:bg-primary-900/20 text-primary-600 dark:text-primary-400 rounded-full text-sm font-bold">
+                  {index + 1}
+                </span>
+              </div>
+              <img
+                src={product.imagen || "/placeholder.svg?height=40&width=40"}
+                alt={product.nombre}
+                className="w-10 h-10 object-cover rounded-lg"
+              />
+              <div className="flex-1 min-w-0">
+                <p className="font-medium text-gray-900 dark:text-white truncate">{product.nombre}</p>
+                <p className="text-sm text-gray-600 dark:text-gray-400">Stock: {product.stock}</p>
+              </div>
+              <div className="text-right">
+                <p className="font-bold text-gray-900 dark:text-white">${product.precio}</p>
+              </div>
+            </div>
+          ))}
         </div>
       </div>
 
@@ -232,28 +294,30 @@ export default function AdminDashboard() {
                     <div className="text-sm font-medium text-gray-900 dark:text-white">#{order.id}</div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-900 dark:text-white">{order.usuario?.name || "Usuario"}</div>
+                    <div className="text-sm text-gray-900 dark:text-white">{order.cliente_nombre || "Usuario"}</div>
                     <div className="text-sm text-gray-500 dark:text-gray-400">
-                      {order.usuario?.email || "email@ejemplo.com"}
+                      {order.cliente_email || "email@ejemplo.com"}
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <span
-                      className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${order.estado === "entregado"
-                        ? "bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400"
+                      className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${order.estado === "enviado"
+                        ? "bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400"
                         : order.estado === "cancelado"
                           ? "bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400"
                           : "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400"
                         }`}
                     >
-                      {order.estado}
+                      {order.estado === "pendiente_envio" ? "Pendiente de Envío" : order.estado}
                     </span>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">
-                    ${order.total}
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="text-sm font-bold text-gray-900 dark:text-white">${order.total}</div>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                    {new Date(order.created_at).toLocaleDateString("es-ES")}
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="text-sm text-gray-900 dark:text-white">
+                      {new Date(order.fecha_creacion).toLocaleDateString("es-ES")}
+                    </div>
                   </td>
                 </tr>
               ))}

@@ -16,6 +16,7 @@ import AdminLayout from "./pages/admin/AdminLayout"
 import AdminDashboard from "./pages/admin/AdminDashboard"
 import ProductManagement from "./pages/admin/ProductManagement"
 import OrderManagement from "./pages/admin/OrderManagement"
+import UsersManagement from "./pages/admin/UsersManagement"
 import { useEffect } from "react"
 import { useCartStore } from "./store/cartStore"
 import { useAuthStore } from "./store/authStore"
@@ -79,6 +80,7 @@ function App() {
           <Route index element={<AdminDashboard />} />
           <Route path="productos" element={<ProductManagement />} />
           <Route path="ordenes" element={<OrderManagement />} />
+          <Route path="usuarios" element={<UsersManagement />} />
         </Route>
       </Routes>
     </Router>

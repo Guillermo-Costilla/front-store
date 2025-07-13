@@ -269,6 +269,30 @@ export default function Orders() {
                         <span className="text-gray-600 dark:text-gray-400">Estado:</span>
                         <span className="font-medium">{getStatusText(order.estado)}</span>
                       </div>
+                      {order.direccion && (
+                        <div className="flex justify-between">
+                          <span className="text-gray-600 dark:text-gray-400">Dirección:</span>
+                          <span className="font-medium">{order.direccion}</span>
+                        </div>
+                      )}
+                      {order.localidad && (
+                        <div className="flex justify-between">
+                          <span className="text-gray-600 dark:text-gray-400">Localidad:</span>
+                          <span className="font-medium">{order.localidad}</span>
+                        </div>
+                      )}
+                      {order.provincia && (
+                        <div className="flex justify-between">
+                          <span className="text-gray-600 dark:text-gray-400">Provincia:</span>
+                          <span className="font-medium">{order.provincia}</span>
+                        </div>
+                      )}
+                      {order.codigo_postal && (
+                        <div className="flex justify-between">
+                          <span className="text-gray-600 dark:text-gray-400">Código Postal:</span>
+                          <span className="font-medium">{order.codigo_postal}</span>
+                        </div>
+                      )}
                       <div className="flex justify-between">
                         <span className="text-gray-600 dark:text-gray-400">Fecha estimada:</span>
                         <span className="font-medium">

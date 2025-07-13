@@ -53,7 +53,7 @@ export default function ProductCard({ product, compact = false }) {
       if (isCurrentlyFavorite) {
         await removeFavorite(user.id, product.id)
       } else {
-        await addFavorite(product, user.id)
+        await addFavorite(user.id, product.id)
       }
     } catch (error) {
       console.error("Error toggling favorite:", error)
@@ -169,8 +169,8 @@ export default function ProductCard({ product, compact = false }) {
 
           {/* Precio */}
           <div className="flex items-center space-x-2">
-            <span className="text-lg font-bold text-primary-600 dark:text-primary-400">${(displayPrice).toFixed(2)}</span>
-            {hasDiscount && <span className="text-sm text-gray-500 line-through">${product.precio}</span>}
+            <span className="text-lg mx-2 font-bold text-primary-600 dark:text-primary-400">${(displayPrice).toFixed(2)}</span>
+            {hasDiscount && <span className="text-sm mx-2 text-gray-500 line-through">${product.precio}</span>}
           </div>
 
           {/* Categoría */}

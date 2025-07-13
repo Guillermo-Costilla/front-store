@@ -11,8 +11,6 @@ export default function AdminLayout() {
     { name: "Productos", href: "/admin/productos", icon: Package },
     { name: "Órdenes", href: "/admin/ordenes", icon: ShoppingBag },
     { name: "Usuarios", href: "/admin/usuarios", icon: Users },
-    { name: "Reportes", href: "/admin/reportes", icon: BarChart3 },
-    { name: "Configuración", href: "/admin/configuracion", icon: Settings },
   ]
 
   return (

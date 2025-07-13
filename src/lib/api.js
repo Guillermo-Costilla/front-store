@@ -119,6 +119,17 @@ export const ordersAPI = {
     const response = await api.post("/orders/confirm-payment", paymentData)
     return response
   },
+
+  // Nuevos métodos para admin
+  getAdminOrders: async (params = {}) => {
+    const response = await api.get("/admin/orders", { params })
+    return response
+  },
+
+  getAdminOrderById: async (orderId) => {
+    const response = await api.get(`/admin/orders/${orderId}`)
+    return response
+  },
 }
 
 // API de pagos
@@ -130,6 +141,16 @@ export const paymentsAPI = {
 
   createPaymentIntent: async (paymentData) => {
     const response = await api.post("/payments/create-payment-intent", paymentData)
+    return response
+  },
+
+  confirmPayment: async (paymentData) => {
+    const response = await api.post("/payments/confirm-payment", paymentData)
+    return response
+  },
+
+  getPaymentStatus: async (paymentIntentId) => {
+    const response = await api.get(`/payments/payment-status/${paymentIntentId}`)
     return response
   },
 
@@ -163,6 +184,27 @@ export const adminAPI = {
     const response = await api.get("/admin/dashboard")
     return response
   },
+
+  getOrders: async (params = {}) => {
+    const response = await api.get("/admin/orders", { params })
+    return response
+  },
+
+  getOrderById: async (orderId) => {
+    const response = await api.get(`/admin/orders/${orderId}`)
+    return response
+  },
+
+  updateOrderStatus: async (orderId, statusData) => {
+    const response = await api.put(`/orders/${orderId}/status`, statusData)
+    return response
+  },
+
+  getUsers: async (params = {}) => {
+    const response = await api.get("/admin/users", { params })
+    return response
+  },
+
 }
 
 export default api

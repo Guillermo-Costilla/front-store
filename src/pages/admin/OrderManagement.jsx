@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react"
 import { Search, Filter, Eye, Edit, Package, Truck, CheckCircle, XCircle } from "lucide-react"
-import { ordersAPI } from "../../lib/api"
+import { adminAPI } from "../../lib/api"
 import Swal from 'sweetalert2'
 
 export default function OrderManagement() {
@@ -10,6 +10,7 @@ export default function OrderManagement() {
   const [selectedStatus, setSelectedStatus] = useState("all")
   const [selectedOrder, setSelectedOrder] = useState(null)
   const [showModal, setShowModal] = useState(false)
+  const [openDropdownOrderId, setOpenDropdownOrderId] = useState(null);
 
   useEffect(() => {
     loadOrders()
@@ -17,8 +18,8 @@ export default function OrderManagement() {
 
   const loadOrders = async () => {
     try {
-      const response = await ordersAPI.getAllOrders()
-      setOrders(response.data)
+      const response = await adminAPI.getOrders()
+      setOrders(response.data.ordenes || response.data)
     } catch (error) {
       Swal.fire('Error al cargar órdenes', '', 'error')
     } finally {
@@ -26,9 +27,13 @@ export default function OrderManagement() {
     }
   }
 
-  const handleStatusChange = async (orderId, newStatus) => {
+  const handleStatusChange = async (orderId, newStatus, newPaymentStatus) => {
     try {
-      await ordersAPI.updateStatus(orderId, newStatus)
+      const statusData = {}
+      if (newStatus) statusData.estado = newStatus
+      if (newPaymentStatus) statusData.pago = newPaymentStatus
+
+      await adminAPI.updateOrderStatus(orderId, statusData)
       Swal.fire('Estado de la orden actualizado', '', 'success')
       loadOrders()
     } catch (error) {
@@ -38,14 +43,10 @@ export default function OrderManagement() {
 
   const getStatusIcon = (status) => {
     switch (status) {
-      case "pendiente":
+      case "pendiente_envio":
         return <Package className="h-5 w-5 text-yellow-500" />
-      case "procesando":
-        return <Edit className="h-5 w-5 text-blue-500" />
       case "enviado":
-        return <Truck className="h-5 w-5 text-purple-500" />
-      case "entregado":
-        return <CheckCircle className="h-5 w-5 text-green-500" />
+        return <Truck className="h-5 w-5 text-blue-500" />
       case "cancelado":
         return <XCircle className="h-5 w-5 text-red-500" />
       default:
@@ -55,14 +56,10 @@ export default function OrderManagement() {
 
   const getStatusColor = (status) => {
     switch (status) {
-      case "pendiente":
+      case "pendiente_envio":
         return "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400"
-      case "procesando":
-        return "bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400"
       case "enviado":
-        return "bg-purple-100 text-purple-800 dark:bg-purple-900/20 dark:text-purple-400"
-      case "entregado":
-        return "bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400"
+        return "bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400"
       case "cancelado":
         return "bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400"
       default:
@@ -70,20 +67,33 @@ export default function OrderManagement() {
     }
   }
 
+  const getStatusText = (status) => {
+    const statusMap = {
+      pendiente_envio: "Pendiente de Envío",
+      enviado: "Enviado",
+      cancelado: "Cancelado",
+    }
+    return statusMap[status] || status
+  }
+
   const filteredOrders = orders.filter((order) => {
     const matchesSearch =
       order.id.toString().includes(searchTerm) ||
-      order.usuario?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      order.usuario?.email?.toLowerCase().includes(searchTerm.toLowerCase())
+      order.cliente?.nombre?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      order.cliente?.email?.toLowerCase().includes(searchTerm.toLowerCase())
     const matchesStatus = selectedStatus === "all" || order.estado === selectedStatus
     return matchesSearch && matchesStatus
   })
 
   const statusOptions = [
-    { value: "pendiente", label: "Pendiente" },
-    { value: "procesando", label: "Procesando" },
+    { value: "pendiente_envio", label: "Pendiente de Envío" },
     { value: "enviado", label: "Enviado" },
-    { value: "entregado", label: "Entregado" },
+    { value: "cancelado", label: "Cancelado" },
+  ]
+
+  const paymentStatusOptions = [
+    { value: "pendiente", label: "Pendiente" },
+    { value: "pagado", label: "Pagado" },
     { value: "cancelado", label: "Cancelado" },
   ]
 
@@ -157,10 +167,10 @@ export default function OrderManagement() {
                 <div>
                   <h3 className="font-semibold text-gray-900 dark:text-white">Orden #{order.id}</h3>
                   <p className="text-sm text-gray-600 dark:text-gray-400">
-                    Cliente: {order.usuario?.name || "Usuario"} ({order.usuario?.email || "email@ejemplo.com"})
+                    Cliente: {order.cliente?.nombre || "Usuario"} ({order.cliente?.email || "email@ejemplo.com"})
                   </p>
                   <p className="text-sm text-gray-600 dark:text-gray-400">
-                    {new Date(order.created_at).toLocaleDateString("es-ES", {
+                    {new Date(order.fecha_creacion).toLocaleDateString("es-ES", {
                       year: "numeric",
                       month: "long",
                       day: "numeric",
@@ -174,31 +184,25 @@ export default function OrderManagement() {
               <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-3 sm:space-y-0 sm:space-x-4">
                 <div className="flex items-center space-x-2">
                   <span className={`px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(order.estado)}`}>
-                    {statusOptions.find((s) => s.value === order.estado)?.label || order.estado}
+                    {getStatusText(order.estado)}
                   </span>
                   <span
-                    className={`px-2 py-1 rounded-full text-xs font-medium ${order.estado_pago === "pagado"
+                    className={`px-2 py-1 rounded-full text-xs font-medium ${order.pago === "pagado"
                       ? "bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400"
                       : "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400"
                       }`}
                   >
-                    {order.estado_pago === "pagado" ? "Pagado" : "Pendiente"}
+                    {order.pago === "pagado" ? "Pagado" : order.pago === "pendiente" ? "Pendiente" : "Cancelado"}
                   </span>
                 </div>
 
                 <div className="text-right">
                   <p className="font-bold text-lg text-gray-900 dark:text-white">${order.total}</p>
-                  {order.descuento > 0 && (
-                    <p className="text-sm text-green-600 dark:text-green-400">Descuento: -${order.descuento}</p>
-                  )}
                 </div>
 
                 <div className="flex space-x-2">
                   <button
-                    onClick={() => {
-                      setSelectedOrder(order)
-                      setShowModal(true)
-                    }}
+                    onClick={() => setOpenDropdownOrderId(openDropdownOrderId === order.id ? null : order.id)}
                     className="p-2 text-blue-600 hover:text-blue-700 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors"
                     title="Ver detalles"
                   >
@@ -216,139 +220,13 @@ export default function OrderManagement() {
                       </option>
                     ))}
                   </select>
-                </div>
-              </div>
-            </div>
 
-            {/* Items preview */}
-            <div className="border-t border-gray-200 dark:border-gray-700 pt-4 mt-4">
-              <div className="flex items-center space-x-4 text-sm text-gray-600 dark:text-gray-400">
-                <span>{order.items?.length || 0} productos</span>
-                {order.cupon_aplicado && (
-                  <span className="text-green-600 dark:text-green-400">Cupón: {order.cupon_aplicado}</span>
-                )}
-              </div>
-            </div>
-          </div>
-        ))}
-      </div>
-
-      {filteredOrders.length === 0 && (
-        <div className="text-center py-12">
-          <p className="text-gray-600 dark:text-gray-400">No se encontraron órdenes que coincidan con los filtros</p>
-        </div>
-      )}
-
-      {/* Modal de detalles */}
-      {showModal && selectedOrder && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white dark:bg-gray-800 rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-            <div className="p-6">
-              <div className="flex justify-between items-center mb-6">
-                <h2 className="text-xl font-bold text-gray-900 dark:text-white">
-                  Detalles de la Orden #{selectedOrder.id}
-                </h2>
-                <button
-                  onClick={() => setShowModal(false)}
-                  className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
-                >
-                  <XCircle className="h-6 w-6" />
-                </button>
-              </div>
-
-              <div className="space-y-6">
-                {/* Información del cliente */}
-                <div>
-                  <h3 className="font-semibold text-gray-900 dark:text-white mb-3">Información del Cliente</h3>
-                  <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
-                    <p className="text-gray-900 dark:text-white">
-                      <strong>Nombre:</strong> {selectedOrder.usuario?.name || "Usuario"}
-                    </p>
-                    <p className="text-gray-900 dark:text-white">
-                      <strong>Email:</strong> {selectedOrder.usuario?.email || "email@ejemplo.com"}
-                    </p>
-                  </div>
-                </div>
-
-                {/* Productos */}
-                <div>
-                  <h3 className="font-semibold text-gray-900 dark:text-white mb-3">Productos Ordenados</h3>
-                  <div className="space-y-3">
-                    {selectedOrder.items?.map((item, index) => (
-                      <div
-                        key={index}
-                        className="flex items-center space-x-4 p-4 bg-gray-50 dark:bg-gray-700 rounded-lg"
-                      >
-                        <img
-                          src={item.producto?.image || "/placeholder.svg?height=50&width=50"}
-                          alt={item.producto?.name}
-                          className="w-12 h-12 object-cover rounded-lg"
-                        />
-                        <div className="flex-1">
-                          <p className="font-medium text-gray-900 dark:text-white">{item.producto?.name}</p>
-                          <p className="text-sm text-gray-600 dark:text-gray-400">
-                            Cantidad: {item.cantidad} × ${item.precio}
-                          </p>
-                        </div>
-                        <p className="font-bold text-gray-900 dark:text-white">
-                          ${(item.cantidad * item.precio).toFixed(2)}
-                        </p>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Resumen de pago */}
-                <div>
-                  <h3 className="font-semibold text-gray-900 dark:text-white mb-3">Resumen de Pago</h3>
-                  <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4 space-y-2">
-                    <div className="flex justify-between">
-                      <span>Subtotal:</span>
-                      <span>
-                        $
-                        {(
-                          Number.parseFloat(selectedOrder.total) + Number.parseFloat(selectedOrder.descuento || 0)
-                        ).toFixed(2)}
-                      </span>
-                    </div>
-                    {selectedOrder.descuento > 0 && (
-                      <div className="flex justify-between text-green-600 dark:text-green-400">
-                        <span>Descuento ({selectedOrder.cupon_aplicado}):</span>
-                        <span>-${selectedOrder.descuento}</span>
-                      </div>
-                    )}
-                    <div className="border-t border-gray-200 dark:border-gray-600 pt-2">
-                      <div className="flex justify-between font-bold text-lg">
-                        <span>Total:</span>
-                        <span>${selectedOrder.total}</span>
-                      </div>
-                    </div>
-                    <div className="flex justify-between text-sm">
-                      <span>Estado de pago:</span>
-                      <span
-                        className={`font-medium ${selectedOrder.estado_pago === "pagado"
-                          ? "text-green-600 dark:text-green-400"
-                          : "text-yellow-600 dark:text-yellow-400"
-                          }`}
-                      >
-                        {selectedOrder.estado_pago === "pagado" ? "Pagado" : "Pendiente"}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Cambiar estado */}
-                <div>
-                  <h3 className="font-semibold text-gray-900 dark:text-white mb-3">Cambiar Estado de la Orden</h3>
                   <select
-                    value={selectedOrder.estado}
-                    onChange={(e) => {
-                      handleStatusChange(selectedOrder.id, e.target.value)
-                      setSelectedOrder({ ...selectedOrder, estado: e.target.value })
-                    }}
-                    className="input w-full"
+                    value={order.pago}
+                    onChange={(e) => handleStatusChange(order.id, null, e.target.value)}
+                    className="text-sm border border-gray-300 dark:border-gray-600 rounded-lg px-2 py-1 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
                   >
-                    {statusOptions.map((status) => (
+                    {paymentStatusOptions.map((status) => (
                       <option key={status.value} value={status.value}>
                         {status.label}
                       </option>
@@ -357,7 +235,49 @@ export default function OrderManagement() {
                 </div>
               </div>
             </div>
+
+            {/* Items preview */}
+            <div className="border-t border-gray-200 dark:border-gray-700 pt-4 mt-4">
+              <div className="flex items-center space-x-4 text-sm text-gray-600 dark:text-gray-400">
+                <span>{order.productos?.length || 0} productos</span>
+                {order.direccion && (
+                  <span className="text-blue-600 dark:text-blue-400">
+                    Envío: {order.direccion}, {order.localidad}
+                  </span>
+                )}
+              </div>
+            </div>
+            {openDropdownOrderId === order.id && (
+              <div className="mt-2 ml-8 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg p-4 w-full max-w-md text-sm z-10">
+                <div className="mb-2">
+                  <span className="font-semibold">Usuario:</span> {order.cliente?.nombre || "N/A"}
+                </div>
+                <div className="mb-2">
+                  <span className="font-semibold">Email:</span> {order.cliente?.email || "N/A"}
+                </div>
+                <div className="mb-2">
+                  <span className="font-semibold">Dirección:</span> {order.direccion}, {order.localidad}, {order.provincia}, {order.codigo_postal}
+                </div>
+                <div>
+                  <span className="font-semibold">Productos:</span>
+                  <ul className="ml-4 mt-1 space-y-1">
+                    {order.productos?.map((item, idx) => (
+                      <li key={idx} className="flex justify-between">
+                        <span>{item.nombre}</span>
+                        <span className="text-gray-500">x{item.cantidad}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+            )}
           </div>
+        ))}
+      </div>
+
+      {filteredOrders.length === 0 && (
+        <div className="text-center py-12">
+          <p className="text-gray-600 dark:text-gray-400">No se encontraron órdenes que coincidan con los filtros</p>
         </div>
       )}
     </div>

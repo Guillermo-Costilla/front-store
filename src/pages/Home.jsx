@@ -9,9 +9,23 @@ export default function Home() {
   const [featuredProducts, setFeaturedProducts] = useState([])
   const [offers, setOffers] = useState([])
   const [isLoading, setIsLoading] = useState(true)
+  const [carouselIndex, setCarouselIndex] = useState(0)
+  const [fade, setFade] = useState(true)
 
   useEffect(() => {
     loadProducts()
+  }, [])
+
+  // Carrusel automático con transición suave
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setFade(false)
+      setTimeout(() => {
+        setCarouselIndex((prev) => (prev + 1) % imagenes.length)
+        setFade(true)
+      }, 400) // duración del fade-out
+    }, 3000)
+    return () => clearInterval(interval)
   }, [])
 
   const loadProducts = async () => {
@@ -27,6 +41,16 @@ export default function Home() {
       setIsLoading(false)
     }
   }
+
+  const imagenes = [
+    "https://images.unsplash.com/photo-1606813907291-d86efa9b94db?w=400&h=400&fit=crop",
+    "https://images.unsplash.com/photo-1549298916-b41d501d3772?w=400&h=400&fit=crop",
+    "https://i5.walmartimages.com/asr/6403388f-2eac-407f-bd23-c79cea9c5e3c.0fa7d11b6d3043bff5c207ff39e6a16b.jpeg",
+    "https://i5.walmartimages.com/seo/Furbo-360-Rotating-Treat-Tossing-1080p-WiFi-Pet-Camera-with-2-Way-Audio-Barking-Alerts_249a15e6-443b-4b0c-ac47-87e5ff47b2b7.fe9da9838fb87afd2b54ad142fedbfde.jpeg",
+    "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400&h=400&fit=crop",
+    "https://nextgames.com.ar/img/Public/1040-producto-switch-neon-2-1455.jpg",
+    "https://images.unsplash.com/photo-1592750475338-74b7b21085ab?w=400&h=400&fit=crop"
+  ]
 
   const features = [
     {
@@ -78,11 +102,12 @@ export default function Home() {
                 </Link>
               </div>
             </div>
-            <div className="animate-slide-up">
+            <div className="animate-slide-up flex items-center justify-center">
               <img
-                src="https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400&h=400&fit=crop"
-                alt="Hero"
-                className="w-full h-auto rounded-lg shadow-2xl"
+                src={imagenes[carouselIndex]}
+                alt={`Hero ${carouselIndex + 1}`}
+                className={`w-full h-auto rounded-lg shadow-2xl transition-opacity duration-700 ${fade ? 'opacity-100' : 'opacity-0'}`}
+                style={{ maxHeight: 400, objectFit: 'cover' }}
               />
             </div>
           </div>
