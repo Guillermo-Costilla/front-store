@@ -169,8 +169,8 @@ export default function ProductCard({ product, compact = false }) {
 
           {/* Precio */}
           <div className="flex items-center space-x-2">
-            <span className="text-lg mx-2 font-bold text-primary-600 dark:text-primary-400">${(displayPrice).toFixed(2)}</span>
-            {hasDiscount && <span className="text-sm mx-2 text-gray-500 line-through">${product.precio}</span>}
+            <span className="text-lg mx-2 font-bold text-primary-600 dark:text-primary-400">${Number(displayPrice).toFixed(0)}</span>
+            {hasDiscount && <span className="text-sm mx-2 text-gray-500 line-through">${Number(product.precio).toFixed(0)}</span>}
           </div>
 
           {/* Categoría */}

@@ -406,8 +406,8 @@ function ProductCardList({ product }) {
 
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-2">
-              <span className="text-2xl font-bold text-primary-600 dark:text-primary-400">${Number(displayPrice).toFixed(2)}</span>
-              {hasDiscount && <span className="text-lg text-gray-500 line-through">${Number(product.precio).toFixed(2)}</span>}
+              <span className="text-2xl font-bold text-primary-600 dark:text-primary-400">${Number(displayPrice).toFixed(0)}</span>
+              {hasDiscount && <span className="text-lg text-gray-500 line-through">${Number(product.precio).toFixed(0)}</span>}
             </div>
 
             <ProductCard product={product} compact={true} />

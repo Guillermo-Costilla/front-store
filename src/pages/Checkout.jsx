@@ -99,7 +99,7 @@ function CheckoutForm() {
       console.log("Keys de la respuesta de orden:", Object.keys(orderResponse.data || {}))
 
       // Según la documentación, debería devolver un objeto con id
-      const orderId = orderResponse.data?.id
+      const orderId = orderResponse.data?.orden_id
 
       console.log("Order ID encontrado:", orderId)
 

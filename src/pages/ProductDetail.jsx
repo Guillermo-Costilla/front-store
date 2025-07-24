@@ -234,8 +234,8 @@ export default function ProductDetail() {
             </div>
 
             <div className="flex items-center space-x-4 mb-6">
-              <span className="text-3xl font-bold text-primary-600 dark:text-primary-400">${displayPrice}</span>
-              {hasDiscount && <span className="text-xl text-gray-500 line-through">${product.precio}</span>}
+              <span className="text-3xl font-bold text-primary-600 dark:text-primary-400">${Number(displayPrice).toFixed(0)}</span>
+              {hasDiscount && <span className="text-xl text-gray-500 line-through">${Number(product.precio).toFixed(0)}</span>}
               {product.descuento > 0 && (
                 <span className="bg-red-100 dark:bg-red-900/20 text-red-800 dark:text-red-400 px-2 py-1 rounded-md text-sm font-semibold">
                   Ahorra {product.descuento}%
