@@ -50,7 +50,7 @@ export default function Header() {
             ))}
           </nav>
 
-          {/* Barra de búsqueda */}
+          {/* Barra de búsqueda Desktop */}
           <div className="hidden md:flex flex-1 max-w-md mx-8">
             <div className="relative w-full">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
@@ -62,7 +62,7 @@ export default function Header() {
             </div>
           </div>
 
-          {/* Acciones */}
+          {/* Acciones Desktop */}
           <div className="hidden md:flex items-center space-x-4">
             {/* Toggle tema */}
             <button
@@ -156,11 +156,13 @@ export default function Header() {
                 </Link>
               </div>
             )}
+          </div>
 
-            {/* Menú móvil */}
+          {/* Botón menú móvil (solo visible en mobile) */}
+          <div className="flex md:hidden flex-1 justify-end">
             <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className="md:hidden p-2 text-gray-700 dark:text-gray-300"
+              className="p-2 text-gray-700 dark:text-gray-300"
             >
               {isMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
             </button>
@@ -207,6 +209,28 @@ export default function Header() {
                 </>
               )}
             </div>
+
+            {/* Carrito y tema móvil */}
+            <div className="flex items-center gap-4 px-3 py-2 border-t border-gray-200 dark:border-gray-700">
+              <Link
+                to="/carrito"
+                className="relative p-2 text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                <ShoppingCart className="h-5 w-5" />
+                {itemCount > 0 && (
+                  <span className="absolute -top-1 -right-1 bg-primary-600 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                    {itemCount}
+                  </span>
+                )}
+              </Link>
+              <button
+                onClick={toggleTheme}
+                className="p-2 text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
+              >
+                {isDark ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
+              </button>
+            </div>
             <div className="px-2 pt-2 pb-3 space-y-1">
               {navigation.map((item) => (
                 <Link
@@ -218,20 +242,6 @@ export default function Header() {
                   {item.name}
                 </Link>
               ))}
-
-              {/* Búsqueda móvil */}
-              <div className="px-3 py-2">
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-                  <input
-                    type="text"
-                    placeholder="Buscar productos..."
-                    className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                  />
-                </div>
-              </div>
-
-
             </div>
           </div>
         )}
