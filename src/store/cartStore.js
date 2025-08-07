@@ -33,17 +33,17 @@ export const useCartStore = create((set, get) => ({
     set({ items })
   },
 
-  addItem: (product) => {
+  addItem: (product, quantity = 1) => {
     const user = useAuthStore.getState().user
     const { items } = get()
     const existingItem = items.find((item) => item.id === product.id)
     let newItems
     if (existingItem) {
       newItems = items.map((item) =>
-        item.id === product.id ? { ...item, quantity: item.quantity + 1 } : item
+        item.id === product.id ? { ...item, quantity: item.quantity + quantity } : item
       )
     } else {
-      newItems = [...items, { ...product, quantity: 1 }]
+      newItems = [...items, { ...product, quantity }]
     }
     set({ items: newItems })
     saveCartToCookie(user, newItems)
